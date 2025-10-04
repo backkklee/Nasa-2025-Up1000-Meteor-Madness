@@ -72,38 +72,49 @@ class Impact1000App {
     }
 
     showSection(sectionName) {
-        // Hide all sections
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.remove('active');
+        // Update navigation buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600');
+            btn.classList.add('bg-gray-600');
         });
 
-        // Show selected section
+        const activeBtn = Array.from(document.querySelectorAll('.nav-btn'))
+            .find(btn => {
+                const btnText = btn.textContent.toLowerCase().trim();
+                const sectionMap = {
+                    'home': 'homepage',
+                    'simulation': 'simulation', 
+                    'impact map': 'impact-map',
+                    'neo data': 'neo-data'
+                };
+                return sectionMap[btnText] === sectionName;
+            });
+        if (activeBtn) {
+            activeBtn.classList.remove('bg-gray-600');
+            activeBtn.classList.add('bg-blue-600');
+        }
+
+        // Smooth scroll to target section
         const targetSection = document.getElementById(sectionName);
         if (targetSection) {
-            targetSection.classList.add('active');
             this.currentSection = sectionName;
-
-            // Update navigation buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600');
-                btn.classList.add('bg-gray-600');
+            
+            // Smooth scroll to the section
+            targetSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
             });
 
-            const activeBtn = Array.from(document.querySelectorAll('.nav-btn'))
-                .find(btn => {
-                    const btnText = btn.textContent.toLowerCase().trim();
-                    const sectionMap = {
-                        'home': 'homepage',
-                        'simulation': 'simulation', 
-                        'impact map': 'impact-map',
-                        'neo data': 'neo-data'
-                    };
-                    return sectionMap[btnText] === sectionName;
-                });
-            if (activeBtn) {
-                activeBtn.classList.remove('bg-gray-600');
-                activeBtn.classList.add('bg-blue-600');
-            }
+            // Add a subtle highlight effect
+            targetSection.style.transition = 'all 0.6s ease';
+            targetSection.style.transform = 'scale(1.02)';
+            targetSection.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
+            
+            // Remove highlight after animation
+            setTimeout(() => {
+                targetSection.style.transform = 'scale(1)';
+                targetSection.style.boxShadow = 'none';
+            }, 600);
 
             // Initialize section-specific features
             if (sectionName === 'simulation') {

@@ -47,10 +47,49 @@
             50% { opacity: 0.7; }
         }
         .section {
-            display: none;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+            opacity: 1;
         }
-        .section.active {
-            display: block;
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .card-glass {
+            transition: all 0.4s ease;
+        }
+        .card-glass:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .section {
+            scroll-margin-top: 80px;
         }
     </style>
 </head>
@@ -64,17 +103,17 @@
                     <h1 class="text-xl font-bold">Impact1000</h1>
                 </div>
                 <div class="flex space-x-4">
-                    <button onclick="showSection('homepage')" class="nav-btn bg-blue-600 px-4 py-2 rounded-lg transition-colors">Home</button>
-                    <button onclick="showSection('simulation')" class="nav-btn bg-gray-600 px-4 py-2 rounded-lg transition-colors">Simulation</button>
-                    <button onclick="showSection('impact-map')" class="nav-btn bg-gray-600 px-4 py-2 rounded-lg transition-colors">Impact Map</button>
-                    <button onclick="showSection('neo-data')" class="nav-btn bg-gray-600 px-4 py-2 rounded-lg transition-colors">NEO Data</button>
+                    <button onclick="showSection('homepage')" class="nav-btn px-4 py-2 rounded-lg transition-colors">Home</button>
+                    <button onclick="showSection('simulation')" class="nav-btn px-4 py-2 rounded-lg transition-colors">Simulation</button>
+                    <button onclick="showSection('impact-map')" class="nav-btn px-4 py-2 rounded-lg transition-colors">Impact Map</button>
+                    <button onclick="showSection('neo-data')" class="nav-btn px-4 py-2 rounded-lg transition-colors">NEO Data</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Homepage Section -->
-    <section id="homepage" class="section active">
+    <section id="homepage" class="section">
         <!-- Banner -->
         <div class="bg-gradient-to-r from-red-900/30 to-orange-900/30 border-b border-red-500/30">
             <div class="container mx-auto px-4 py-12 text-center">
