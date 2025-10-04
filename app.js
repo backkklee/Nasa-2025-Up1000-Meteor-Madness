@@ -7,6 +7,7 @@ class Impact1000App {
         this.neos = [];
         this.impactLocation = null;
         this.simulationResults = null;
+        this.currentTheme = 'light'; // Default to light theme
         
         // NASA API configuration
         this.nasaApiKey = 'blDnIkMiodN56bU3pYopb0ZzSfFnYGg92qnYWq5U';
@@ -17,6 +18,7 @@ class Impact1000App {
 
     async init() {
         this.setupEventListeners();
+        this.initializeTheme();
         this.startCountdown();
         await this.setupMaps();
         await this.loadNEOData();
@@ -71,50 +73,89 @@ class Impact1000App {
         });
     }
 
+    initializeTheme() {
+        // Load theme from localStorage or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        this.setTheme(savedTheme);
+    }
+
+    setTheme(theme) {
+        this.currentTheme = theme;
+        document.body.setAttribute('data-theme', theme);
+        
+        // Update theme icon
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) {
+            themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('theme', theme);
+        
+        // Update map themes if they exist
+        this.updateMapThemes();
+    }
+
+    toggleTheme() {
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
+
+    updateMapThemes() {
+        // Update simulation map theme
+        if (this.simulationMap) {
+            const container = this.simulationMap.getContainer();
+            if (this.currentTheme === 'dark') {
+                container.style.filter = 'invert(1) hue-rotate(180deg)';
+            } else {
+                container.style.filter = 'none';
+            }
+        }
+        
+        // Update impact map theme
+        if (this.impactMap) {
+            const container = this.impactMap.getContainer();
+            if (this.currentTheme === 'dark') {
+                container.style.filter = 'invert(1) hue-rotate(180deg)';
+            } else {
+                container.style.filter = 'none';
+            }
+        }
+    }
+
     showSection(sectionName) {
-        // Update navigation buttons
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.classList.remove('bg-blue-600');
-            btn.classList.add('bg-gray-600');
+        // Hide all sections
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
         });
 
-        const activeBtn = Array.from(document.querySelectorAll('.nav-btn'))
-            .find(btn => {
-                const btnText = btn.textContent.toLowerCase().trim();
-                const sectionMap = {
-                    'home': 'homepage',
-                    'simulation': 'simulation', 
-                    'impact map': 'impact-map',
-                    'neo data': 'neo-data'
-                };
-                return sectionMap[btnText] === sectionName;
-            });
-        if (activeBtn) {
-            activeBtn.classList.remove('bg-gray-600');
-            activeBtn.classList.add('bg-blue-600');
-        }
-
-        // Smooth scroll to target section
+        // Show selected section
         const targetSection = document.getElementById(sectionName);
         if (targetSection) {
+            targetSection.classList.add('active');
             this.currentSection = sectionName;
-            
-            // Smooth scroll to the section
-            targetSection.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600');
+                btn.classList.add('bg-gray-600');
             });
 
-            // Add a subtle highlight effect
-            targetSection.style.transition = 'all 0.6s ease';
-            targetSection.style.transform = 'scale(1.02)';
-            targetSection.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
-            
-            // Remove highlight after animation
-            setTimeout(() => {
-                targetSection.style.transform = 'scale(1)';
-                targetSection.style.boxShadow = 'none';
-            }, 600);
+            const activeBtn = Array.from(document.querySelectorAll('.nav-btn'))
+                .find(btn => {
+                    const btnText = btn.textContent.toLowerCase().trim();
+                    const sectionMap = {
+                        'home': 'homepage',
+                        'simulation': 'simulation', 
+                        'impact map': 'impact-map',
+                        'neo data': 'neo-data'
+                    };
+                    return sectionMap[btnText] === sectionName;
+                });
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-gray-600');
+                activeBtn.classList.add('bg-blue-600');
+            }
 
             // Initialize section-specific features
             if (sectionName === 'simulation') {
@@ -174,8 +215,8 @@ class Impact1000App {
             this.setImpactLocation(e.latlng);
         });
 
-        // Dark theme
-        this.simulationMap.getContainer().style.filter = 'invert(1) hue-rotate(180deg)';
+        // Apply theme
+        this.updateMapThemes();
     }
 
     initializeImpactMap() {
@@ -193,8 +234,8 @@ class Impact1000App {
             maxZoom: 18
         }).addTo(this.impactMap);
 
-        // Dark theme
-        this.impactMap.getContainer().style.filter = 'invert(1) hue-rotate(180deg)';
+        // Apply theme
+        this.updateMapThemes();
 
         // Add default Impactor-2025 zone
         this.addImpactor2025Zone();
@@ -563,6 +604,12 @@ class Impact1000App {
 function showSection(sectionName) {
     if (window.impact1000App) {
         window.impact1000App.showSection(sectionName);
+    }
+}
+
+function toggleTheme() {
+    if (window.impact1000App) {
+        window.impact1000App.toggleTheme();
     }
 }
 
