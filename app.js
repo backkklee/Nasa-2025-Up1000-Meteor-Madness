@@ -1,5 +1,5 @@
-// Impactor-2025: The Theoretical Meteor Threat - Main Application
-class ImpactorApp {
+// Impact1000: Living under the threat of a meteor impact? No worries! Impact1000 will help minimize your risks, while so keeping your self educated! - Main Application
+class Impact1000App {
     constructor() {
         this.currentSection = 'homepage';
         this.simulationMap = null;
@@ -541,12 +541,12 @@ class ImpactorApp {
 
 // Global functions for HTML onclick handlers
 function showSection(sectionName) {
-    if (window.impactorApp) {
-        window.impactorApp.showSection(sectionName);
+    if (window.impact1000App) {
+        window.impact1000App.showSection(sectionName);
     }
 }
 
 // Initialize the application when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    window.impactorApp = new ImpactorApp();
+    window.impact1000App = new Impact1000App();
 });

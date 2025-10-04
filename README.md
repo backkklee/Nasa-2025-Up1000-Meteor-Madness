@@ -1,4 +1,4 @@
-# NASA NEO Impact Visualization Platform
+# Impact1000: Living under the threat of a meteor impact? No worries! Impact1000 will help minimize your risks, while so keeping your self educated!
 
 A comprehensive web-based platform for visualizing Near-Earth Objects (NEOs), predicting impact scenarios, and evaluating mitigation strategies using real NASA and USGS datasets. Built for NASA Space Apps Challenge 2025 - Meteor Madness.
 
@@ -217,4 +217,4 @@ For questions, issues, or contributions:
 
 **Built with ❤️ for NASA Space Apps Challenge 2025 - Meteor Madness**
 
-*Exploring the cosmos, protecting our planet, one visualization at a time.*
+*Living under the threat of a meteor impact? No worries! Impact1000 will help minimize your risks, while so keeping your self educated!*
