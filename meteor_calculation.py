@@ -1,74 +1,56 @@
-import math
+import pandas as pd
+import numpy as np
+from astropy import units as u
+from astropy.time import Time
+from poliastro.bodies import Sun, Earth
+from poliastro.twobody import Orbit
 
-# Preset densities (kg/m³) for common types
-DENSITY_PRESETS = {
-    "Stony": 3000,
-    "Iron": 8000,
-    "Comet": 500
-}
+def select_asteroid(df):
+    print("\nSelect an asteroid by its name, id, or designation:")
+    print(df[['id', 'name', 'designation']].head(10))  # Show preview
+    key = input("Enter asteroid id, name, or designation: ").strip()
+    # Flexible match
+    sel = df[(df['id'].astype(str) == key) | (df['name'] == key) | (df['designation'].astype(str) == key)]
+    if sel.empty:
+        print("Asteroid not found.")
+        return None
+    return sel.iloc[0]
 
-def get_float(prompt, min_value=None, max_value=None, default=None):
-    while True:
-        try:
-            inp = input(prompt)
-            if inp == "" and default is not None:
-                return default
-            value = float(inp)
-            if min_value is not None and value < min_value:
-                print(f"Value must be at least {min_value}.")
-                continue
-            if max_value is not None and value > max_value:
-                print(f"Value must be at most {max_value}.")
-                continue
-            return value
-        except ValueError:
-            print("Please enter a valid number.")
+def calc_potential_impact(row):
+    a = float(row['a'])  # semi-major axis (AU)
+    e = float(row['e'])  # eccentricity
+    inc = float(row['i'])  # inclination (deg)
+    raan = float(row['om'])  # longitude of ascending node (deg)
+    argp = float(row['w'])   # argument of perihelion (deg)
+    M = float(row['ma'])     # mean anomaly at epoch (deg)
+    epoch_jd = float(row['epoch'])  # Julian Date
+    epoch = Time(epoch_jd, format='jd', scale='tdb')
+    
+    asteroid = Orbit.from_classical(Sun, a*u.au, e*u.one, inc*u.deg, raan*u.deg, argp*u.deg, M*u.deg, epoch=epoch)
+    earth = Orbit.from_body_ephem(Earth, epoch=epoch)
+    N = 1000
+    times = epoch + np.linspace(0, 365, N)*u.day
+    ast_pos = asteroid.sample(times)
+    earth_pos = earth.sample(times)
+    ast_xyz = ast_pos.xyz.to(u.km).value.T
+    earth_xyz = earth_pos.xyz.to(u.km).value.T
+    dists = np.linalg.norm(ast_xyz - earth_xyz, axis=1)
+    min_idx = np.argmin(dists)
+    min_dist = dists[min_idx]
 
-def select_density():
-    print("\nSelect meteor type:")
-    for i, t in enumerate(DENSITY_PRESETS, 1):
-        print(f"{i}. {t} ({DENSITY_PRESETS[t]} kg/m³)")
-    print(f"{len(DENSITY_PRESETS)+1}. Custom")
-    while True:
-        choice = input("Enter choice number: ")
-        try:
-            idx = int(choice)
-            if 1 <= idx <= len(DENSITY_PRESETS):
-                return list(DENSITY_PRESETS.values())[idx-1]
-            elif idx == len(DENSITY_PRESETS)+1:
-                return get_float("Enter custom density (kg/m³): ", min_value=100, max_value=15000)
-            else:
-                print("Invalid choice.")
-        except ValueError:
-            print("Please enter a valid number.")
+    if min_dist < 6371:
+        print("Potential impact detected!")
+        impact_coords = ast_xyz[min_idx]
+        x, y, z = impact_coords
+        r = np.linalg.norm(impact_coords)
+        lat = np.arcsin(z / r) * 180/np.pi
+        lon = np.arctan2(y, x) * 180/np.pi
+        print(f"Closest approach: {min_dist:.1f} km (lat={lat:.2f}, lon={lon:.2f})")
+    else:
+        print(f"No impact. Closest approach: {min_dist:.1f} km")
 
-def meteor_properties():
-    print("Enter your custom meteor parameters:")
-
-    diameter = get_float("Diameter (m) [1-2000]: ", min_value=1, max_value=2000)
-    density = select_density()
-    velocity = get_float("Velocity at impact (km/s) [11-72]: ", min_value=11, max_value=72)
-    angle = get_float("Impact angle (degrees, default 45) [0-90]: ", min_value=0, max_value=90, default=45)
-    location_lat = get_float("Impact latitude (deg, optional -90 to 90) [default 0]: ", min_value=-90, max_value=90, default=0)
-    location_lon = get_float("Impact longitude (deg, optional -180 to 180) [default 0]: ", min_value=-180, max_value=180, default=0)
-
-    radius = diameter / 2
-    volume = (4/3) * math.pi * (radius ** 3)
-    mass = density * volume  # in kg
-    velocity_m_s = velocity * 1000  # convert to m/s
-
-    kinetic_energy = 0.5 * mass * (velocity_m_s ** 2)  # in Joules
-    tnt_equiv = kinetic_energy / 4.184e9  # in tons of TNT
-
-    print("\n--- Meteor Physical Properties ---")
-    print(f"Diameter: {diameter} m")
-    print(f"Density: {density} kg/m^3")
-    print(f"Mass (calculated): {mass:.2f} kg")
-    print(f"Velocity: {velocity} km/s ({velocity_m_s} m/s)")
-    print(f"Impact angle: {angle} degrees")
-    print(f"Impact location: ({location_lat}, {location_lon})")
-    print(f"Kinetic energy: {kinetic_energy:.2e} Joules")
-    print(f"TNT equivalent: {tnt_equiv:.2f} tons")
-
-if __name__ == "__main__":
-    meteor_properties()
+if __name__ == '__main__':
+    df = pd.read_csv('asteroid_data_full.csv')  # Your merged, enriched dataset
+    row = select_asteroid(df)
+    if row is not None:
+        calc_potential_impact(row)
