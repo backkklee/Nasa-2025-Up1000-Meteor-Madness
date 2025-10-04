@@ -46,6 +46,12 @@
             0%, 100% { opacity: 0.3; }
             50% { opacity: 0.7; }
         }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen text-white">
@@ -58,10 +64,10 @@
                     <h1 class="text-xl font-bold">Impact1000</h1>
                 </div>
                 <div class="flex space-x-4">
-                    <button onclick="showSection('homepage')" class="nav-btn px-4 py-2 rounded-lg transition-colors">Home</button>
-                    <button onclick="showSection('simulation')" class="nav-btn px-4 py-2 rounded-lg transition-colors">Simulation</button>
-                    <button onclick="showSection('impact-map')" class="nav-btn px-4 py-2 rounded-lg transition-colors">Impact Map</button>
-                    <button onclick="showSection('neo-data')" class="nav-btn px-4 py-2 rounded-lg transition-colors">NEO Data</button>
+                    <button onclick="showSection('homepage')" class="nav-btn bg-blue-600 px-4 py-2 rounded-lg transition-colors">Home</button>
+                    <button onclick="showSection('simulation')" class="nav-btn bg-gray-600 px-4 py-2 rounded-lg transition-colors">Simulation</button>
+                    <button onclick="showSection('impact-map')" class="nav-btn bg-gray-600 px-4 py-2 rounded-lg transition-colors">Impact Map</button>
+                    <button onclick="showSection('neo-data')" class="nav-btn bg-gray-600 px-4 py-2 rounded-lg transition-colors">NEO Data</button>
                 </div>
             </div>
         </div>

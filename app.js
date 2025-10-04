@@ -90,7 +90,16 @@ class Impact1000App {
             });
 
             const activeBtn = Array.from(document.querySelectorAll('.nav-btn'))
-                .find(btn => btn.textContent.toLowerCase().replace(' ', '-') === sectionName);
+                .find(btn => {
+                    const btnText = btn.textContent.toLowerCase().trim();
+                    const sectionMap = {
+                        'home': 'homepage',
+                        'simulation': 'simulation', 
+                        'impact map': 'impact-map',
+                        'neo data': 'neo-data'
+                    };
+                    return sectionMap[btnText] === sectionName;
+                });
             if (activeBtn) {
                 activeBtn.classList.remove('bg-gray-600');
                 activeBtn.classList.add('bg-blue-600');
