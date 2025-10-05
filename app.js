@@ -896,8 +896,8 @@ class Impact1000App {
                 </div>
             `;
             
-            item.addEventListener('click', () => {
-                this.selectNEO(neo);
+            item.addEventListener('click', (evt) => {
+                this.selectNEO(neo, evt);
             });
             
             container.appendChild(item);
@@ -950,14 +950,16 @@ class Impact1000App {
         }
     }
 
-    selectNEO(neo) {
+    selectNEO(neo, evt) {
         // Remove previous selection
         document.querySelectorAll('.neo-card').forEach(card => {
             card.classList.remove('selected');
         });
         
-        // Add selection to clicked item
-        event.currentTarget.classList.add('selected');
+        // Add selection to clicked item (guard if no event provided)
+        if (evt && evt.currentTarget) {
+            evt.currentTarget.classList.add('selected');
+        }
         
         // Store selected NEO
         this.selectedNEO = neo;
@@ -971,11 +973,19 @@ class Impact1000App {
         `;
         
         // Enable buttons
-        document.getElementById('run-neo-simulation').disabled = false;
-        document.getElementById('view-neo-orbit').disabled = false;
+        const runNeoBtn = document.getElementById('run-neo-simulation');
+        if (runNeoBtn) runNeoBtn.disabled = false;
+        const viewOrbitBtn2 = document.getElementById('view-neo-orbit');
+        if (viewOrbitBtn2) viewOrbitBtn2.disabled = false;
         
-        // Enable "Use NEO Data" button in simulation section
-        document.getElementById('use-neo-data').disabled = false;
+        // Enable "Use NEO Data" button in simulation section (remove disabled attr for Tailwind state)
+        const useNeoBtn = document.getElementById('use-neo-data');
+        if (useNeoBtn) {
+            useNeoBtn.disabled = false;
+            useNeoBtn.removeAttribute('disabled');
+            useNeoBtn.classList.remove('disabled:cursor-not-allowed');
+            useNeoBtn.classList.remove('disabled:bg-gray-600');
+        }
     }
 
     useNEODataInSimulation() {
