@@ -984,31 +984,68 @@ class Impact1000App {
             return;
         }
 
-        // Update simulation parameters with NEO data
         const neo = this.selectedNEO;
-        
-        // Update sliders with NEO data
-        document.getElementById('size-slider').value = neo.diameter;
-        document.getElementById('size-value').textContent = neo.diameter + 'm';
-        
-        document.getElementById('speed-slider').value = neo.velocity;
-        document.getElementById('speed-value').textContent = neo.velocity + ' km/s';
-        
-        // Set default angle (45 degrees for typical impact)
-        document.getElementById('angle-slider').value = 45;
-        document.getElementById('angle-value').textContent = '45°';
-        
-        // Set default density (2500 kg/m³ for typical asteroid)
-        document.getElementById('density-slider').value = 2500;
-        document.getElementById('density-value').textContent = '2500 kg/m³';
-        
-        // Switch to simulation section FIRST
+
+        // Navigate to simulation first to ensure controls are visible and ready
         this.showSection('simulation');
-        
-        // Show success message after navigation
+
+        // Apply values after navigation paint, dispatch input events so any listeners update derived UI
         setTimeout(() => {
+            this.applyNEOToSimulationSliders(neo);
             this.showNEODataAppliedMessage(neo);
-        }, 100);
+            // Focus the Run Simulation button for quick action
+            const runBtn = document.getElementById('run-simulation');
+            if (runBtn) runBtn.focus();
+        }, 50);
+    }
+
+    // Apply NEO data to simulation sliders and UI labels, normalizing units as needed
+    applyNEOToSimulationSliders(neo) {
+        // Diameter: ensure meters (CSV may be km). If value appears too small (<1000), treat as meters; if <100, assume km and convert
+        let diameterMeters = neo.diameter;
+        if (typeof diameterMeters === 'number') {
+            if (diameterMeters < 100) {
+                // Likely kilometers
+                diameterMeters = diameterMeters * 1000;
+            }
+        }
+        const sizeSlider = document.getElementById('size-slider');
+        const sizeValue = document.getElementById('size-value');
+        if (sizeSlider && sizeValue) {
+            sizeSlider.value = diameterMeters;
+            sizeValue.textContent = diameterMeters + 'm';
+            sizeSlider.dispatchEvent(new Event('input'));
+            sizeSlider.dispatchEvent(new Event('change'));
+        }
+
+        // Velocity km/s
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        if (speedSlider && speedValue) {
+            speedSlider.value = neo.velocity;
+            speedValue.textContent = neo.velocity + ' km/s';
+            speedSlider.dispatchEvent(new Event('input'));
+            speedSlider.dispatchEvent(new Event('change'));
+        }
+
+        // Defaults for angle and density if not provided by NEO
+        const angleSlider = document.getElementById('angle-slider');
+        const angleValue = document.getElementById('angle-value');
+        if (angleSlider && angleValue) {
+            angleSlider.value = 45;
+            angleValue.textContent = '45°';
+            angleSlider.dispatchEvent(new Event('input'));
+            angleSlider.dispatchEvent(new Event('change'));
+        }
+
+        const densitySlider = document.getElementById('density-slider');
+        const densityValue = document.getElementById('density-value');
+        if (densitySlider && densityValue) {
+            densitySlider.value = 2500;
+            densityValue.textContent = '2500 kg/m³';
+            densitySlider.dispatchEvent(new Event('input'));
+            densitySlider.dispatchEvent(new Event('change'));
+        }
     }
 
     showNEODataAppliedMessage(neo) {

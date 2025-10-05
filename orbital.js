@@ -134,9 +134,9 @@ class OrbitalVisualizer {
         // Create asteroid orbit path
         const orbitPoints = asteroidData.orbital_points || [];
         if (orbitPoints.length > 0) {
-            const geometry = new THREE.BufferGeometry();
+    const geometry = new THREE.BufferGeometry();
             const vertices = new Float32Array(orbitPoints.flat().map(v => v * 10)); // Scale up
-            geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
             
             const material = new THREE.LineBasicMaterial({ 
                 color: 0xff4444,

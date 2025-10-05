@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Impact1000</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --nav-border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            --bg-card: rgba(255, 255, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #f1f5f9;
+            --text-muted: #cbd5e1;
+            --border-color: rgba(255, 255, 255, 0.2);
+            --nav-bg: rgba(0, 0, 0, 0.2);
+            --nav-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        body { background: var(--bg-primary); color: var(--text-primary); }
+        .gradient-bg { background: var(--bg-primary); }
+        .card-glass { background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--border-color); box-shadow: var(--shadow); }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 600; box-shadow: var(--shadow); transition: all .2s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .profile-image { width: 96px; height: 96px; border-radius: 9999px; object-fit: cover; border: 3px solid #3b82f6; margin: 0 auto; }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen" data-theme="dark">
+    <nav class="backdrop-blur-sm border-b sticky top-0 z-50" style="background: var(--nav-bg); border-color: var(--nav-border);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <h1 class="text-xl font-bold text-blue-400">Impact1000</h1>
+                <div class="flex items-center space-x-3">
+                    <button onclick="window.location.href='index.html'" class="btn-primary"><i class="fas fa-home mr-2"></i>Home</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <h1 class="text-5xl font-bold text-center mb-8" style="color: var(--text-primary);">About Impact1000</h1>
+
+        <section class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-3xl font-bold mb-4" style="color: var(--text-primary);">Purpose</h2>
+            <p class="text-lg leading-relaxed" style="color: var(--text-secondary);">
+                Impact1000 is a public demonstration project created for the Meteor Madness Hackathon. It visualizes the potential effects of a meteor impact and explores how data-driven simulations can inform better evacuation strategies and planetary defense awareness.
+            </p>
+        </section>
+
+        <section class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-3xl font-bold mb-6" style="color: var(--text-primary);">Development Team — Up1000%</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card-glass rounded-xl p-6 text-center">
+                    <img src="https://via.placeholder.com/120x120/f59e0b/ffffff?text=VH" class="profile-image mb-3" alt="Viet Hoang Vu">
+                    <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary);">Viet Hoang Vu</h3>
+                    <p class="text-blue-400 font-semibold">UI/UX Designer</p>
+                </div>
+                <div class="card-glass rounded-xl p-6 text-center">
+                    <img src="https://via.placeholder.com/120x120/10b981/ffffff?text=DN" class="profile-image mb-3" alt="Dac Le Bach Nguyen">
+                    <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary);">Dac Le Bach Nguyen</h3>
+                    <p class="text-green-400 font-semibold">Backend Developer</p>
+                </div>
+                <div class="card-glass rounded-xl p-6 text-center">
+                    <img src="https://via.placeholder.com/120x120/6366f1/ffffff?text=KL" class="profile-image mb-3" alt="Kien Anh Le">
+                    <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary);">Kien Anh Le</h3>
+                    <p class="text-indigo-300 font-semibold">Data Scientist</p>
+                </div>
+                <div class="card-glass rounded-xl p-6 text-center">
+                    <img src="https://via.placeholder.com/120x120/ef4444/ffffff?text=TN" class="profile-image mb-3" alt="Trong Nghia Nguyen">
+                    <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary);">Trong Nghia Nguyen</h3>
+                    <p class="text-red-300 font-semibold">Frontend Developer</p>
+                </div>
+            </div>
+            <p class="text-center mt-4 text-sm" style="color: var(--text-muted);">4 members (placeholder)</p>
+        </section>
+
+        <section class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-3xl font-bold mb-4" style="color: var(--text-primary);">Data & Tools</h2>
+            <ul class="list-disc pl-6 space-y-1" style="color: var(--text-secondary);">
+                <li>NASA CNEOS — Near-Earth Object data</li>
+                <li>Leaflet.js — Interactive 2D maps</li>
+                <li>Three.js — 3D orbital visualization</li>
+                <li>Flask (Python) — Backend API for physics calculations</li>
+                <li>Pandas, NumPy — Data processing</li>
+            </ul>
+        </section>
+
+        <section class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-3xl font-bold mb-4" style="color: var(--text-primary);">Acknowledgements</h2>
+            <p class="text-lg" style="color: var(--text-secondary);">We thank NASA and open scientific databases and visualization frameworks that enable accessible learning about Earth-impact risks.</p>
+        </section>
+
+        <section class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-3xl font-bold mb-4" style="color: var(--text-primary);">Disclaimer</h2>
+            <p class="text-lg" style="color: var(--text-secondary);">Impact1000 is a fictional educational tool. All simulations, including “Impactor-2025,” are hypothetical and not predictive.</p>
+        </section>
+
+        <div class="text-center">
+            <button onclick="window.location.href='index.html'" class="btn-primary"><i class="fas fa-arrow-left mr-2"></i>Back to Impact1000</button>
+        </div>
+    </main>
+</body>
+</html>
