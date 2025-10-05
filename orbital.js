@@ -18,9 +18,10 @@ class OrbitalVisualizer {
     init() {
         this.setupScene();
         this.setupCamera();
-        this.renderer = null;
+        this.setupRenderer();
         this.setupLighting();
         this.createCelestialBodies();
+        this.setupControls();
         this.animate();
     }
     
@@ -95,7 +96,11 @@ class OrbitalVisualizer {
         this.earth.receiveShadow = true;
         this.scene.add(this.earth);
         
-        // Add orbital controls
+        // Controls are initialized after renderer is created
+    }
+
+    setupControls() {
+        if (!this.renderer) return;
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;

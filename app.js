@@ -1073,11 +1073,12 @@ class Impact1000App {
         // Show action buttons
         document.getElementById('neo-results-actions').style.display = 'flex';
         
-        // Store current NEO data for map viewing
+        // Store current NEO data for map viewing (carry miss distance if available)
         this.currentNEOForMap = {
             id: neo.id,
             name: neo.name,
-            simulationResults: results
+            simulationResults: results,
+            lastMissDistance: neo.lastMissDistance || 0
         };
     }
 
@@ -1111,18 +1112,19 @@ class Impact1000App {
 
         // Switch to impact map section
         this.showSection('impact-map');
-        
-        // Set the impact location and results
-        this.impactLocation = {
-            lat: 40.7128, // Default to NYC for demo
-            lng: -74.0060,
-            name: this.currentNEOForMap.name
+
+        // Prepare NEO data for impact map layer logic
+        this.currentNEOData = {
+            id: this.currentNEOForMap.id,
+            name: this.currentNEOForMap.name,
+            simulationResults: this.currentNEOForMap.simulationResults,
+            lastMissDistance: this.currentNEOForMap.simulationResults?.miss_distance_km
+                ? this.currentNEOForMap.simulationResults.miss_distance_km * 1000
+                : (this.currentNEOForMap.lastMissDistance || 0)
         };
-        
-        this.simulationResults = this.currentNEOForMap.simulationResults;
-        
-        // Update impact map with results
-        this.updateImpactMap();
+
+        // Update the impact map with NEO simulation data
+        this.updateImpactMapWithNEOData();
     }
 
     clearNEOResults() {
