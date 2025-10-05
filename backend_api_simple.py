@@ -84,77 +84,6 @@ class MeteorPhysics:
         # Very simplified model
         return (megatons ** 0.6) * 1000000
     
-    def calculate_orbital_mechanics(self, asteroid_id):
-        """
-        Calculate orbital mechanics for a specific asteroid
-        Simplified version without poliastro dependency
-        """
-        if self.asteroid_data.empty:
-            return None
-        
-        # Find asteroid by ID (try both string and int conversion)
-        asteroid = None
-        try:
-            # Try exact match first
-            asteroid = self.asteroid_data[self.asteroid_data['id'] == asteroid_id]
-            if asteroid.empty:
-                # Try converting to int
-                asteroid = self.asteroid_data[self.asteroid_data['id'] == int(asteroid_id)]
-            if asteroid.empty:
-                # Try converting to string
-                asteroid = self.asteroid_data[self.asteroid_data['id'].astype(str) == str(asteroid_id)]
-        except:
-            pass
-            
-        if asteroid is None or asteroid.empty:
-            print(f"Asteroid with ID {asteroid_id} not found")
-            return None
-        
-        row = asteroid.iloc[0]
-        
-        try:
-            # Extract orbital elements (using available data from CSV)
-            diameter_avg = float(row['diameter_avg_m'])
-            velocity_kmh = float(row['last_relative_velocity_kmh'])
-            miss_distance = float(row['last_miss_distance_km'])
-            
-            # Convert velocity to m/s
-            velocity_ms = velocity_kmh / 3.6
-            
-            # Calculate orbital period from available data
-            orbital_period_days = float(row['orbital_period_days'])
-            
-            # Generate orbital points (simplified)
-            orbital_points = self.generate_orbital_points(orbital_period_days, miss_distance)
-            
-            return {
-                'asteroid_id': asteroid_id,
-                'name': row['name'],
-                'diameter_m': diameter_avg,
-                'velocity_ms': velocity_ms,
-                'miss_distance_km': miss_distance,
-                'orbital_period_days': orbital_period_days,
-                'orbital_points': orbital_points,
-                'last_approach_date': row['last_close_approach_date']
-            }
-        except Exception as e:
-            print(f"Error calculating orbital mechanics: {e}")
-            return None
-    
-    def generate_orbital_points(self, period_days, miss_distance_km):
-        """Generate simplified orbital points"""
-        # Generate points for visualization (simplified)
-        points = []
-        steps = 100
-        for i in range(steps):
-            angle = 2 * np.pi * i / steps
-            # Simplified elliptical orbit approximation
-            x = miss_distance_km * np.cos(angle) / 149600000  # Convert to AU
-            y = miss_distance_km * np.sin(angle) / 149600000
-            z = 0
-            points.append([x, y, z])
-        return points
-
     def determine_impact_location(self, asteroid_id):
         """
         Determine a deterministic, approximate Earth impact location for visualization.
@@ -207,15 +136,6 @@ def get_asteroids():
         print(f"First asteroid ID: {asteroids[0]['id']}")
     return jsonify(asteroids)
 
-@app.route('/api/asteroid/<int:asteroid_id>', methods=['GET'])
-def get_asteroid(asteroid_id):
-    """Get specific asteroid orbital mechanics"""
-    orbital_data = physics.calculate_orbital_mechanics(asteroid_id)
-    if orbital_data:
-        return jsonify(orbital_data)
-    else:
-        return jsonify({'error': 'Asteroid not found'}), 404
-
 @app.route('/api/impact/calculate', methods=['POST'])
 def calculate_impact():
     """Calculate impact effects"""
@@ -232,28 +152,37 @@ def calculate_impact():
     
     return jsonify(results)
 
-@app.route('/api/impact/asteroid/<int:asteroid_id>', methods=['POST'])
+@app.route('/api/impact/asteroid/<path:asteroid_id>', methods=['POST'])
 def calculate_asteroid_impact(asteroid_id):
     """Calculate impact effects for a specific asteroid"""
     print(f"Calculating impact for asteroid ID: {asteroid_id}")
-    orbital_data = physics.calculate_orbital_mechanics(asteroid_id)
-    if not orbital_data:
+    # Look up asteroid row from CSV
+    asteroid = None
+    try:
+        asteroid = physics.asteroid_data[physics.asteroid_data['id'] == asteroid_id]
+        if asteroid.empty:
+            asteroid = physics.asteroid_data[physics.asteroid_data['id'].astype(str) == str(asteroid_id)]
+    except Exception:
+        asteroid = None
+
+    if asteroid is None or asteroid.empty:
         print(f"Asteroid {asteroid_id} not found in database")
         return jsonify({'error': 'Asteroid not found'}), 404
-    
-    # Use asteroid's actual properties
-    diameter_m = orbital_data['diameter_m']
-    velocity_ms = orbital_data['velocity_ms']
+
+    row = asteroid.iloc[0]
+
+    # Use asteroid's properties from CSV
+    diameter_m = float(row['diameter_avg_m'])
+    velocity_ms = float(row['last_relative_velocity_kmh']) / 3.6
     angle_deg = 45  # Default impact angle
     density_kgm3 = 2500  # Default rock density
     
     # Calculate impact effects
     results = physics.calculate_impact_effects(diameter_m, velocity_ms, angle_deg, density_kgm3)
 
-    # Determine impact vs no-impact using miss distance
-    miss_distance_km = float(orbital_data.get('miss_distance_km', 0))
+    # Determine impact vs no-impact using miss distance from CSV
+    miss_distance_km = float(row['last_miss_distance_km']) if 'last_miss_distance_km' in row else 0.0
     earth_radius_km = 6371.0
-
     if miss_distance_km <= earth_radius_km:
         lat, lng = physics.determine_impact_location(asteroid_id)
         results['impact_latitude'] = lat
@@ -263,9 +192,6 @@ def calculate_asteroid_impact(asteroid_id):
     else:
         results['miss_distance_km'] = miss_distance_km
         results['will_impact_earth'] = False
-
-    # Add orbital data to results
-    results['orbital_data'] = orbital_data
 
     return jsonify(results)
 

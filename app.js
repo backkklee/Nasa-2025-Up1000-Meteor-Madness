@@ -102,9 +102,12 @@ class Impact1000App {
             this.runNEOSimulation();
         });
 
-        document.getElementById('view-neo-orbit').addEventListener('click', () => {
-            this.viewNEOOrbit();
-        });
+        const viewOrbitBtn = document.getElementById('view-neo-orbit');
+        if (viewOrbitBtn) {
+            viewOrbitBtn.addEventListener('click', () => {
+                this.viewNEOOrbit();
+            });
+        }
 
         // NEO Results component buttons
         document.getElementById('view-neo-in-map').addEventListener('click', () => {
@@ -253,7 +256,6 @@ class Impact1000App {
             // Initialize section-specific features
             if (sectionName === 'simulation') {
                 this.initializeSimulationMap();
-                this.initializeOrbitalVisualizer();
             } else if (sectionName === 'impact-map') {
                 this.initializeImpactMap();
             } else if (sectionName === 'evacuation') {
@@ -319,16 +321,7 @@ class Impact1000App {
         this.updateMapThemes();
     }
 
-    initializeOrbitalVisualizer() {
-        if (this.orbitalVisualizer) return;
-
-        try {
-            this.orbitalVisualizer = new OrbitalVisualizer('orbital-container');
-            console.log('Orbital visualizer initialized');
-        } catch (error) {
-            console.error('Error initializing orbital visualizer:', error);
-        }
-    }
+    // Orbital visualizer removed for simplified backend usage
 
     initializeImpactMap() {
         if (this.impactMap) return;
@@ -502,8 +495,14 @@ class Impact1000App {
 
     async runSimulation() {
         if (!this.impactLocation) {
-            alert('Please select an impact location on the map first.');
-            return;
+            // If an NEO is selected, auto-determine impact via backend
+            if (this.selectedNEO) {
+                const autoOk = await this.autoDetermineImpactFromNEO();
+                if (!autoOk) return; // either no impact or failure handled inside
+            } else {
+                alert('Please select an impact location on the map, or choose an NEO.');
+                return;
+            }
         }
 
         const size = parseFloat(document.getElementById('size-slider').value);
@@ -538,6 +537,61 @@ class Impact1000App {
         } catch (error) {
             console.error('Error running simulation:', error);
             alert('Error running simulation. Please try again.');
+        }
+    }
+
+    async autoDetermineImpactFromNEO() {
+        try {
+            // Prefer backend if available
+            let backendAvailable = false;
+            try {
+                const healthResponse = await fetch(`${this.backendUrl}/health`);
+                backendAvailable = healthResponse.ok;
+            } catch (_) {}
+
+            if (!backendAvailable) {
+                alert('Backend not available to determine impact location. Please click on the map to set location.');
+                return false;
+            }
+
+            const response = await fetch(`${this.backendUrl}/impact/asteroid/${encodeURIComponent(this.selectedNEO.id)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error(`Backend error ${response.status}`);
+
+            const results = await response.json();
+
+            if (results.will_impact_earth === false) {
+                alert(`${this.selectedNEO.name} will not impact Earth. Closest approach: ${(results.miss_distance_km || 0).toFixed(0)} km`);
+                return false;
+            }
+
+            if (typeof results.impact_latitude === 'number' && typeof results.impact_longitude === 'number') {
+                this.impactLocation = { lat: results.impact_latitude, lng: results.impact_longitude };
+
+                // Update outputs immediately from backend results
+                this.simulationResults = results;
+                document.getElementById('energy-output').textContent = (results.energy_mt || results.energy) + ' MT';
+                document.getElementById('crater-output').textContent = (results.crater_diameter_km || results.craterDiameter) + ' km';
+                document.getElementById('fireball-output').textContent = (results.fireball_radius_km || results.fireballRadius) + ' km';
+                document.getElementById('tsunami-output').textContent = (results.tsunami_height_m || results.tsunamiHeight) + ' m';
+                document.getElementById('seismic-output').textContent = (results.seismic_magnitude || results.seismicMagnitude);
+                document.getElementById('population-output').textContent = (results.affected_population || results.affectedPopulation || 0).toLocaleString();
+
+                // Draw zones on simulation map
+                this.addImpactZones(results);
+                return true;
+            }
+
+            // If no coordinates returned, fall back to manual selection
+            alert('Impact location not provided by backend. Please click on the map to set location.');
+            return false;
+        } catch (e) {
+            console.error('Auto impact determination failed:', e);
+            alert('Failed to determine impact automatically. Please click on the map.');
+            return false;
         }
     }
 
@@ -838,8 +892,7 @@ class Impact1000App {
                 <div class="text-xs neo-details space-y-1">
                     <div>Diameter: ${(neo.diameter / 1000).toFixed(2)} km</div>
                     <div>Velocity: ${neo.velocity.toFixed(1)} km/s</div>
-                    <div>Miss Distance: ${(neo.lastMissDistance / 1000000).toFixed(2)}M km</div>
-                    <div>Last Approach: ${neo.lastCloseApproachDate}</div>
+                    
                 </div>
             `;
             
@@ -1775,8 +1828,7 @@ class Impact1000App {
                 <div class="text-xs neo-details space-y-1">
                     <div>Diameter: ${(neo.diameter / 1000).toFixed(2)} km</div>
                     <div>Velocity: ${neo.velocity.toFixed(1)} km/s</div>
-                    <div>Miss Distance: ${(neo.lastMissDistance / 1000000).toFixed(2)}M km</div>
-                    <div>Last Approach: ${neo.lastCloseApproachDate}</div>
+                    
                 </div>
             `;
             

@@ -774,11 +774,7 @@
                         <!-- Map Container -->
                         <div id="simulation-map" class="w-full h-96 rounded-lg mb-6"></div>
                         
-                        <!-- Orbital Visualization -->
-                        <div class="mb-6">
-                            <h4 class="font-semibold mb-3 text-purple-400">3D Orbital Visualization</h4>
-                            <div id="orbital-container" class="w-full h-64 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--border-color);"></div>
-                        </div>
+                        <!-- Orbital Visualization removed for simplified backend usage -->
                         
                         <!-- Output Panels -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -968,9 +964,7 @@
                             <button id="run-neo-simulation" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                                 <i class="fas fa-play mr-2"></i>Run NEO Impact Simulation
                             </button>
-                            <button id="view-neo-orbit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
-                                <i class="fas fa-globe mr-2"></i>View Orbital Path
-                            </button>
+                            <!-- View Orbital Path button removed -->
                             <button id="use-neo-data" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg text-sm transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                                 <i class="fas fa-meteor mr-2"></i>Use NEO Data in Simulation
                             </button>
@@ -1474,7 +1468,6 @@
         </div>
     </footer>
 
-    <script src="orbital.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
