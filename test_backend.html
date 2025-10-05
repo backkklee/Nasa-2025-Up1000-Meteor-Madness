@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Test</title>
+</head>
+<body>
+    <h1>Backend API Test</h1>
+    <button onclick="testBackend()">Test Backend</button>
+    <div id="results"></div>
+
+    <script>
+        async function testBackend() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch('http://localhost:5000/api/health');
+                const healthData = await healthResponse.json();
+                console.log('Health check:', healthData);
+                
+                // Test asteroids endpoint
+                const asteroidsResponse = await fetch('http://localhost:5000/api/asteroids');
+                const asteroidsData = await asteroidsResponse.json();
+                console.log('Asteroids:', asteroidsData);
+                
+                // Test impact calculation for first asteroid
+                if (asteroidsData.length > 0) {
+                    const firstAsteroid = asteroidsData[0];
+                    console.log('Testing impact for asteroid:', firstAsteroid.id);
+                    
+                    const impactResponse = await fetch(`http://localhost:5000/api/impact/asteroid/${firstAsteroid.id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    if (impactResponse.ok) {
+                        const impactData = await impactResponse.json();
+                        console.log('Impact results:', impactData);
+                        
+                        resultsDiv.innerHTML = `
+                            <h2>✅ Backend is working!</h2>
+                            <p>Health: ${healthData.status}</p>
+                            <p>Asteroids loaded: ${asteroidsData.length}</p>
+                            <p>Test asteroid: ${firstAsteroid.name}</p>
+                            <p>Impact energy: ${impactData.energy_mt} MT</p>
+                        `;
+                    } else {
+                        const errorText = await impactResponse.text();
+                        resultsDiv.innerHTML = `<h2>❌ Impact calculation failed</h2><p>Error: ${errorText}</p>`;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultsDiv.innerHTML = `<h2>❌ Test failed</h2><p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

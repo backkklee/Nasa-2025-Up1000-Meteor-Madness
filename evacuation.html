@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evacuation Strategy - Impact1000</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            /* Light theme variables */
+            --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.8);
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --nav-border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.1);
+            --bg-card: rgba(255, 255, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #f1f5f9;
+            --text-muted: #cbd5e1;
+            --border-color: rgba(255, 255, 255, 0.2);
+            --nav-bg: rgba(0, 0, 0, 0.2);
+            --nav-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .gradient-bg {
+            background: var(--bg-primary);
+        }
+
+        .card-glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .card-glass:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .severity-bar {
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .severity-indicator {
+            position: absolute;
+            top: -4px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .risk-zone {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .risk-safe {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
+        .risk-caution {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+
+        .risk-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .accordion-header {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.active {
+            max-height: 500px;
+        }
+
+        .countdown-timer {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .mini-map {
+            width: 200px;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #3b82f6;
+        }
+
+        .impact-ring {
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            position: absolute;
+            opacity: 0.7;
+        }
+
+        .ring-fireball { border-color: #ff6b6b; }
+        .ring-crater { border-color: #ffa726; }
+        .ring-damage { border-color: #ffeb3b; }
+
+        /* Theme-specific text colors */
+        [data-theme="light"] .text-gray-800 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="light"] .text-gray-600 {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="light"] .text-gray-400 {
+            color: var(--text-muted);
+        }
+
+        [data-theme="dark"] .text-gray-800 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .text-gray-600 {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .text-gray-400 {
+            color: var(--text-muted);
+        }
+
+        /* Button styling to match homepage */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen" data-theme="dark">
+    <!-- Navigation -->
+    <nav class="backdrop-blur-sm border-b sticky top-0 z-50" style="background: var(--nav-bg); border-color: var(--nav-border);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-blue-400">Impact1000</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i id="theme-icon" class="fas fa-moon text-yellow-400"></i>
+                    </button>
+                    <button onclick="window.location.href='index.html'" class="btn-primary">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Simulation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header Summary -->
+        <div class="card-glass rounded-xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-3xl font-bold" style="color: var(--text-primary);">
+                    Evacuation Plan: <span id="scenario-name">Asteroid Impact Simulation</span>
+                </h1>
+                <div class="countdown-timer" id="countdown-timer">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span id="time-remaining">02:47:33</span>
+                </div>
+            </div>
+
+            <!-- Key Facts Row -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="card-glass rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                        <span class="font-semibold" style="color: var(--text-secondary);">Impact Location</span>
+                    </div>
+                    <p class="text-sm" style="color: var(--text-muted);" id="impact-location">Atlantic Ocean, 200km off New York</p>
+                </div>
+
+                <div class="card-glass rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
+                        <span class="font-semibold" style="color: var(--text-secondary);">Severity Index</span>
+                    </div>
+                    <div class="severity-bar">
+                        <div class="severity-indicator" style="left: 75%;"></div>
+                    </div>
+                    <p class="text-sm" style="color: var(--text-muted);" class="mt-1">High Risk</p>
+                </div>
+
+                <div class="card-glass rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-broadcast-tower text-blue-500 mr-2"></i>
+                        <span class="font-semibold" style="color: var(--text-secondary);">Shockwave ETA</span>
+                    </div>
+                    <p class="text-sm" style="color: var(--text-muted);" id="shockwave-eta">~15 minutes</p>
+                </div>
+
+                <div class="card-glass rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-map text-green-500 mr-2"></i>
+                        <span class="font-semibold" style="color: var(--text-secondary);">Risk Zones</span>
+                    </div>
+                    <div class="mini-map" id="mini-map">
+                        <!-- Mini map will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button onclick="window.location.href='index.html#impact-map'" class="btn-primary">
+                    <i class="fas fa-external-link-alt mr-2"></i>Reopen Full Simulation
+                </button>
+            </div>
+        </div>
+
+        <!-- Personal Risk Assessment -->
+        <div class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+                <i class="fas fa-user-shield text-blue-500 mr-3"></i>Personal Risk Assessment
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Location Input -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Your Location
+                        </label>
+                        <div class="flex space-x-2">
+                            <input type="text" id="user-location" placeholder="Enter city or coordinates" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                            <button id="detect-location" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-crosshairs mr-1"></i>Auto Detect
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-3">Risk Assessment Results</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400">Distance to Impact:</span>
+                                <span class="font-semibold text-gray-800 dark:text-gray-200" id="distance-to-impact">Calculating...</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400">Shockwave Arrival:</span>
+                                <span class="font-semibold text-gray-800 dark:text-gray-200" id="shockwave-arrival">Calculating...</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 dark:text-gray-400">Risk Zone:</span>
+                                <div class="risk-zone risk-safe" id="risk-zone">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Safe Zone</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Visualization -->
+                <div class="space-y-4">
+                    <h3 class="font-semibold text-gray-800 dark:text-gray-200">Risk Zone Map</h3>
+                    <div id="risk-map" class="w-full h-64 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+                    <button id="generate-evac-plan" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-route mr-2"></i>Generate My Evac Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evacuation Guidance -->
+        <div class="card-glass rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+                <i class="fas fa-list-check text-green-500 mr-3"></i>Evacuation Guidance
+            </h2>
+
+            <div class="space-y-4">
+                <!-- Before Impact -->
+                <div class="border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <div class="accordion-header bg-gray-50 dark:bg-gray-700 p-4 rounded-t-lg" onclick="toggleAccordion('before-impact')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-clock text-blue-500 mr-3"></i>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Before Impact</h3>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform" id="before-impact-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="accordion-content" id="before-impact-content">
+                        <div class="p-4 space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Pack emergency kit with water, food, first aid, and important documents.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Confirm evacuation route and have backup options ready.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Monitor official alerts and weather updates continuously.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Inform family and friends of your evacuation plan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- During Impact -->
+                <div class="border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <div class="accordion-header bg-gray-50 dark:bg-gray-700 p-4 rounded-t-lg" onclick="toggleAccordion('during-impact')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">During Impact</h3>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform" id="during-impact-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="accordion-content" id="during-impact-content">
+                        <div class="p-4 space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Stay indoors and move to the center of the building.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Stay away from windows and exterior walls.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Protect your ears and eyes from the blast wave.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Take cover under sturdy furniture if possible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- After Impact -->
+                <div class="border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <div class="accordion-header bg-gray-50 dark:bg-gray-700 p-4 rounded-t-lg" onclick="toggleAccordion('after-impact')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-shield-alt text-green-500 mr-3"></i>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">After Impact</h3>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform" id="after-impact-chevron"></i>
+                        </div>
+                    </div>
+                    <div class="accordion-content" id="after-impact-content">
+                        <div class="p-4 space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Avoid coastal areas due to potential tsunami waves.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Check radio updates for official safety information.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Seek medical aid if injured and help others if safe.</p>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">Stay away from damaged buildings and debris.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-glass rounded-xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Navigation Links -->
+                <div>
+                    <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Navigation</h3>
+                    <div class="space-y-2">
+                        <a href="index.html" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Simulation
+                        </a>
+                        <a href="index.html#impact-map" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <i class="fas fa-map mr-2"></i>Impact Map Viewer
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Educational Topics -->
+                <div>
+                    <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Educational Topics</h3>
+                    <div class="space-y-2">
+                        <div class="text-sm" style="color: var(--text-muted);">
+                            <i class="fas fa-info-circle mr-2"></i>How energy and angle determine destruction zones
+                        </div>
+                        <div class="text-sm" style="color: var(--text-muted);">
+                            <i class="fas fa-info-circle mr-2"></i>Why coastal cities face double-risk (blast + tsunami)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Sources -->
+                <div>
+                    <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Data Sources</h3>
+                    <div class="space-y-2 text-sm" style="color: var(--text-muted);">
+                        <div><i class="fas fa-database mr-2"></i>NASA CNEOS</div>
+                        <div><i class="fas fa-database mr-2"></i>USGS</div>
+                        <div><i class="fas fa-database mr-2"></i>Impact1000 Simulation</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t mt-6 pt-4" style="border-color: var(--border-color);">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm" style="color: var(--text-muted);">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Disclaimer:</strong> This is an educational demonstration and not real emergency guidance.
+                    </div>
+                    <div class="text-sm" style="color: var(--text-muted);">
+                        Impact1000 © 2025
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            
+            const themeIcon = document.getElementById('theme-icon');
+            themeIcon.className = newTheme === 'light' ? 'fas fa-moon text-yellow-400' : 'fas fa-sun text-yellow-400';
+            
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        const themeIcon = document.getElementById('theme-icon');
+        themeIcon.className = savedTheme === 'light' ? 'fas fa-moon text-yellow-400' : 'fas fa-sun text-yellow-400';
+
+        // Countdown Timer
+        function updateCountdown() {
+            const countdownElement = document.getElementById('time-remaining');
+            let time = countdownElement.textContent;
+            let [hours, minutes, seconds] = time.split(':').map(Number);
+            
+            seconds--;
+            if (seconds < 0) {
+                seconds = 59;
+                minutes--;
+                if (minutes < 0) {
+                    minutes = 59;
+                    hours--;
+                    if (hours < 0) {
+                        hours = 0;
+                        minutes = 0;
+                        seconds = 0;
+                    }
+                }
+            }
+            
+            countdownElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        setInterval(updateCountdown, 1000);
+
+        // Mini Map
+        function initializeMiniMap() {
+            const miniMap = L.map('mini-map', {
+                center: [40.7128, -74.0060],
+                zoom: 6,
+                zoomControl: false,
+                attributionControl: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                keyboard: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(miniMap);
+
+            // Add impact point
+            L.marker([40.7128, -74.0060], {
+                icon: L.divIcon({
+                    className: 'impact-marker',
+                    html: '<i class="fas fa-bomb text-red-500 text-xl"></i>',
+                    iconSize: [20, 20]
+                })
+            }).addTo(miniMap);
+
+            // Add risk rings
+            const fireballRing = L.circle([40.7128, -74.0060], {
+                radius: 50000,
+                className: 'impact-ring ring-fireball',
+                fill: false,
+                weight: 2
+            }).addTo(miniMap);
+
+            const craterRing = L.circle([40.7128, -74.0060], {
+                radius: 200000,
+                className: 'impact-ring ring-crater',
+                fill: false,
+                weight: 2
+            }).addTo(miniMap);
+
+            const damageRing = L.circle([40.7128, -74.0060], {
+                radius: 500000,
+                className: 'impact-ring ring-damage',
+                fill: false,
+                weight: 2
+            }).addTo(miniMap);
+        }
+
+        // Risk Assessment Map
+        function initializeRiskMap() {
+            const riskMap = L.map('risk-map', {
+                center: [40.7128, -74.0060],
+                zoom: 4,
+                zoomControl: true
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(riskMap);
+
+            // Add impact point
+            L.marker([40.7128, -74.0060], {
+                icon: L.divIcon({
+                    className: 'impact-marker',
+                    html: '<i class="fas fa-bomb text-red-500 text-2xl"></i>',
+                    iconSize: [30, 30]
+                })
+            }).addTo(riskMap);
+
+            // Add risk zones
+            L.circle([40.7128, -74.0060], {
+                radius: 50000,
+                color: '#ff6b6b',
+                fillColor: '#ff6b6b',
+                fillOpacity: 0.3,
+                weight: 2
+            }).addTo(riskMap).bindPopup('Fireball Zone - Immediate destruction');
+
+            L.circle([40.7128, -74.0060], {
+                radius: 200000,
+                color: '#ffa726',
+                fillColor: '#ffa726',
+                fillOpacity: 0.2,
+                weight: 2
+            }).addTo(riskMap).bindPopup('Crater Zone - Severe damage');
+
+            L.circle([40.7128, -74.0060], {
+                radius: 500000,
+                color: '#ffeb3b',
+                fillColor: '#ffeb3b',
+                fillOpacity: 0.1,
+                weight: 2
+            }).addTo(riskMap).bindPopup('Damage Zone - Moderate effects');
+        }
+
+        // Location Detection
+        document.getElementById('detect-location').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('user-location').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    calculateRiskAssessment(lat, lng);
+                }, function(error) {
+                    alert('Unable to detect location. Please enter manually.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        });
+
+        // Risk Assessment Calculation
+        function calculateRiskAssessment(lat, lng) {
+            const impactLat = 40.7128;
+            const impactLng = -74.0060;
+            
+            // Calculate distance using Haversine formula
+            const distance = calculateDistance(lat, lng, impactLat, impactLng);
+            
+            document.getElementById('distance-to-impact').textContent = `${distance.toFixed(0)} km`;
+            
+            // Calculate shockwave arrival time (simplified)
+            const shockwaveTime = Math.max(1, Math.floor(distance / 1000)); // Rough estimate
+            document.getElementById('shockwave-arrival').textContent = `${shockwaveTime} minutes`;
+            
+            // Determine risk zone
+            const riskZoneElement = document.getElementById('risk-zone');
+            if (distance < 50) {
+                riskZoneElement.className = 'risk-zone risk-danger';
+                riskZoneElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Danger Zone</span>';
+            } else if (distance < 200) {
+                riskZoneElement.className = 'risk-zone risk-caution';
+                riskZoneElement.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Caution Zone</span>';
+            } else {
+                riskZoneElement.className = 'risk-zone risk-safe';
+                riskZoneElement.innerHTML = '<i class="fas fa-check-circle"></i><span>Safe Zone</span>';
+            }
+            
+            // Enable evac plan button
+            document.getElementById('generate-evac-plan').disabled = false;
+        }
+
+        // Distance calculation using Haversine formula
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Accordion functionality
+        function toggleAccordion(id) {
+            const content = document.getElementById(id + '-content');
+            const chevron = document.getElementById(id + '-chevron');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                chevron.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('active');
+                chevron.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Generate Evacuation Plan
+        document.getElementById('generate-evac-plan').addEventListener('click', function() {
+            alert('Evacuation plan generated! Check the guidance sections above for detailed instructions.');
+        });
+
+        // Initialize maps when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMiniMap();
+            initializeRiskMap();
+        });
+    </script>
+</body>
+</html>
