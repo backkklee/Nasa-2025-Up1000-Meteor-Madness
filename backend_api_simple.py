@@ -154,6 +154,26 @@ class MeteorPhysics:
             z = 0
             points.append([x, y, z])
         return points
+
+    def determine_impact_location(self, asteroid_id):
+        """
+        Determine a deterministic, approximate Earth impact location for visualization.
+        This is a simplified fallback used when detailed ephemerides are unavailable.
+        """
+        try:
+            nid = int(str(asteroid_id).encode('utf-8').hex()[:6], 16)
+        except Exception:
+            nid = abs(hash(str(asteroid_id)))
+
+        base_lat = (nid % 120) - 60
+        base_lng = ((nid // 7) % 360) - 180
+
+        if -30 <= base_lng <= 30:
+            base_lng += 60 if base_lng >= 0 else -60
+
+        lat = max(-60, min(60, base_lat))
+        lng = base_lng
+        return lat, lng
     
     def get_asteroid_list(self):
         """Get list of all asteroids"""
@@ -229,10 +249,24 @@ def calculate_asteroid_impact(asteroid_id):
     
     # Calculate impact effects
     results = physics.calculate_impact_effects(diameter_m, velocity_ms, angle_deg, density_kgm3)
-    
+
+    # Determine impact vs no-impact using miss distance
+    miss_distance_km = float(orbital_data.get('miss_distance_km', 0))
+    earth_radius_km = 6371.0
+
+    if miss_distance_km <= earth_radius_km:
+        lat, lng = physics.determine_impact_location(asteroid_id)
+        results['impact_latitude'] = lat
+        results['impact_longitude'] = lng
+        results['miss_distance_km'] = miss_distance_km
+        results['will_impact_earth'] = True
+    else:
+        results['miss_distance_km'] = miss_distance_km
+        results['will_impact_earth'] = False
+
     # Add orbital data to results
     results['orbital_data'] = orbital_data
-    
+
     return jsonify(results)
 
 @app.route('/api/health', methods=['GET'])
