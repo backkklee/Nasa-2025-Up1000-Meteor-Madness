@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impact1000: Living under the threat of a meteor impact? No worries! Impact1000 will help minimize your risks, while at the same time keeping you educated!</title>
+    <title>Impact1000 - Meteor Impact Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -20,18 +20,74 @@
     
     <style>
         :root {
-            /* Light theme variables */
-            --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
-            --bg-secondary: rgba(255, 255, 255, 0.8);
-            --bg-card: rgba(255, 255, 255, 0.9);
-            --text-primary: #1e293b;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --border-color: rgba(0, 0, 0, 0.1);
-            --nav-bg: rgba(255, 255, 255, 0.8);
-            --nav-border: rgba(0, 0, 0, 0.1);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            /* Light theme variables - Very Light Beige */
+            --bg-primary: linear-gradient(135deg, #fdf6e3 0%, #f5e6d3 50%, #ede4d3 100%);
+            --bg-secondary: rgba(255, 248, 240, 0.8);
+            --bg-card: rgba(255, 248, 240, 0.9);
+            --text-primary: #2d1b0e;
+            --text-secondary: #5c4a3a;
+            --text-muted: #8b7355;
+            --border-color: rgba(139, 115, 85, 0.2);
+            --nav-bg: rgba(255, 248, 240, 0.8);
+            --nav-border: rgba(139, 115, 85, 0.2);
+            --shadow: 0 4px 6px -1px rgba(139, 115, 85, 0.15);
+            --shadow-lg: 0 10px 15px -3px rgba(139, 115, 85, 0.2);
+        }
+
+        /* NEO Results Component Styles */
+        [data-theme="light"] .neo-results-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="light"] .neo-results-impact {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+        
+        [data-theme="light"] .neo-results-environmental {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        [data-theme="light"] .neo-results-title {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="light"] .neo-results-text {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .neo-results-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .neo-results-impact {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        
+        [data-theme="dark"] .neo-results-environmental {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        
+        [data-theme="dark"] .neo-results-title {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .neo-results-text {
+            color: var(--text-secondary);
+        }
+        
+        /* NEO Display Styles */
+        [data-theme="light"] .neo-display {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .neo-display {
+            color: var(--text-secondary);
         }
 
         [data-theme="dark"] {
@@ -154,59 +210,126 @@
         
         /* Light theme specific adjustments */
         [data-theme="light"] .nav-btn {
-            background: #4b5563;
-            color: #ffffff;
-            border: 1px solid #6b7280;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
         
         [data-theme="light"] .nav-btn:hover {
-            background: #2563eb;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: var(--bg-secondary);
+            color: #f87171;
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.2);
         }
         
         [data-theme="light"] .nav-btn.active {
-            background: #1d4ed8;
+            background: #f87171;
             color: #ffffff;
         }
         
         [data-theme="light"] input[type="range"] {
-            background: #e2e8f0;
+            background: #d4c4a8;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        [data-theme="light"] input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f87171;
+            cursor: pointer;
+            border: 2px solid #fff8f0;
+            box-shadow: 0 2px 4px rgba(139, 115, 85, 0.3);
+        }
+        
+        [data-theme="light"] input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f87171;
+            cursor: pointer;
+            border: 2px solid #fff8f0;
+            box-shadow: 0 2px 4px rgba(139, 115, 85, 0.3);
         }
         
         [data-theme="light"] select {
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: #fff8f0;
+            border-color: #b8a082;
             color: var(--text-primary);
         }
         
         [data-theme="light"] input[type="text"] {
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: #fff8f0;
+            border-color: #b8a082;
             color: var(--text-primary);
+        }
+        
+        /* Button disabled state styling */
+        [data-theme="light"] button:disabled {
+            color: #8b7355 !important;
+        }
+        
+        [data-theme="dark"] button:disabled {
+            color: #9ca3af !important;
         }
         
         /* Dark theme specific adjustments */
         [data-theme="dark"] .nav-btn {
-            background: #374151;
-            color: #ffffff;
-            border: 1px solid #4b5563;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
         
         [data-theme="dark"] .nav-btn:hover {
-            background: #2563eb;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            background: var(--bg-secondary);
+            color: #f87171;
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
         }
         
         [data-theme="dark"] .nav-btn.active {
-            background: #1d4ed8;
+            background: #f87171;
             color: #ffffff;
+        }
+        
+        [data-theme="dark"] input[type="range"] {
+            background: #4a5568;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        [data-theme="dark"] input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f87171;
+            cursor: pointer;
+            border: 2px solid #1a202c;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="dark"] input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f87171;
+            cursor: pointer;
+            border: 2px solid #1a202c;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         /* Homepage banner styling */
         .homepage-banner {
-            background: #ffffff;
+            background: #fff8f0;
             transition: all 0.3s ease;
         }
         
@@ -225,23 +348,23 @@
         
         /* NEO Data section styling */
         .neo-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #fff8f0;
+            border: 1px solid #d4c4a8;
             transition: all 0.3s ease;
         }
         
         .neo-card:hover {
-            background: #e2e8f0;
+            background: #f5e6d3;
             transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(139, 115, 85, 0.15);
         }
         
         .neo-name {
-            color: #1e293b;
+            color: #2d1b0e;
         }
         
         .neo-details {
-            color: #475569;
+            color: #5c4a3a;
         }
         
         [data-theme="dark"] .neo-card {
@@ -264,13 +387,13 @@
         
         /* NEO Selection styling */
         .neo-card.selected {
-            border: 2px solid #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid #f87171;
+            background: rgba(248, 113, 113, 0.1);
         }
         
         [data-theme="light"] .neo-card.selected {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: #3b82f6;
+            background: rgba(248, 113, 113, 0.1);
+            border-color: #f87171;
         }
         
         /* Toggle Switch Styles */
@@ -321,15 +444,97 @@
         
         /* Light theme switch styles */
         [data-theme="light"] .slider {
-            background-color: #d1d5db;
+            background-color: #d4c4a8;
         }
         
         [data-theme="light"] .slider:before {
-            background-color: white;
+            background-color: #fff8f0;
         }
         
         [data-theme="light"] input:checked + .slider {
-            background-color: #3b82f6;
+            background-color: #f87171;
+        }
+        
+        /* Evacuation page specific styles */
+        .severity-bar {
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .severity-indicator {
+            position: absolute;
+            top: -4px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .risk-zone {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .risk-safe {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
+        .risk-caution {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+
+        .risk-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .accordion-header {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.active {
+            max-height: 500px;
+        }
+
+        .countdown-timer {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .mini-map {
+            width: 200px;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #3b82f6;
         }
     </style>
 </head>
@@ -340,14 +545,15 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-meteor text-red-400 text-2xl"></i>
-                    <h1 class="text-xl font-bold">Impact1000</h1>
+                    <h1 class="text-3xl font-bold font-mono uppercase" style="color: var(--text-primary);">IMPACT1000</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button data-section="homepage" class="nav-btn px-4 py-2 rounded-lg transition-colors bg-gray-600 text-white hover:bg-blue-600">Home</button>
-                    <button data-section="simulation" class="nav-btn px-4 py-2 rounded-lg transition-colors bg-gray-600 text-white hover:bg-blue-600">Simulation</button>
-                    <button data-section="impact-map" class="nav-btn px-4 py-2 rounded-lg transition-colors bg-gray-600 text-white hover:bg-blue-600">Impact Map</button>
-                    <button data-section="neo-data" class="nav-btn px-4 py-2 rounded-lg transition-colors bg-gray-600 text-white hover:bg-blue-600">NEO Data</button>
-                    <button onclick="window.location.href='about.html'" class="nav-btn px-4 py-2 rounded-lg transition-colors bg-gray-600 text-white hover:bg-blue-600">About</button>
+                    <button data-section="homepage" class="nav-btn px-4 py-2 rounded-lg transition-colors">Home</button>
+                    <button data-section="simulation" class="nav-btn px-4 py-2 rounded-lg transition-colors">Simulation</button>
+                    <button data-section="impact-map" class="nav-btn px-4 py-2 rounded-lg transition-colors">Impact Map</button>
+                    <button data-section="neo-data" class="nav-btn px-4 py-2 rounded-lg transition-colors">NEO Data</button>
+                    <button data-section="evacuation" class="nav-btn px-4 py-2 rounded-lg transition-colors">Evacuation</button>
+                    <button data-section="about" class="nav-btn px-4 py-2 rounded-lg transition-colors">About</button>
                     <button onclick="toggleTheme()" class="theme-toggle px-3 py-2 rounded-lg text-sm" title="Toggle theme">
                         <i class="fas fa-sun" id="theme-icon"></i>
                     </button>
@@ -360,17 +566,14 @@
     <section id="homepage" class="section">
         <!-- Banner -->
         <div class="homepage-banner border-b border-red-500/30">
-            <div class="container mx-auto px-4 py-12 text-center">
-                <h1 class="text-5xl font-bold mb-4">
-                    <span class="text-red-400">Impact1000</span><br>
+            <div class="container mx-auto px-40 py-16 text-center">
+                <h1 class="text-7xl font-bold font-mono uppercase mb-4"> 
+                    <span class="text-red-400">IMPACT1000</span>
                 </h1>
-                <h2 class="text-xl font-bold">
-                    Living under the threat of a meteor impact? No worries! Impact1000 will help minimize your risks, while at the same time keeping you educated!
-                </h2>
-                <p class="text-xl mb-8" style="color: var(--text-secondary);">Explore the potential impact of Impactor-2025 theoretical meteor collision with Earth</p>
+                <p class="text-xl mb-6 font-bold" style="color: var(--text-secondary);">Living under the threat of a meteor impact? Impact1000 makes it simple to understand the risks, plan your response, and stay informed—safely and interactively.</p>
                 
                 <!-- Countdown Timer -->
-                <div class="card-glass rounded-xl p-8 max-w-2xl mx-auto mb-8">
+                <div class="card-glass rounded-xl p-8 max-w-4xl mx-auto mb-8">
                     <h2 class="text-2xl font-semibold mb-6">Time to Theoretical Impact</h2>
                     <div id="countdown" class="grid grid-cols-4 gap-4 text-center">
                         <div class="countdown-item">
@@ -415,7 +618,7 @@
                 </div>
 
                 <!-- Explore Button -->
-                <button onclick="showSection('simulation')" class="explore-btn bg-red-600 hover:bg-red-700 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                <button onclick="showSection('simulation')" class="explore-btn bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
                     <i class="fas fa-play mr-2"></i>Explore the Simulation
                 </button>
             </div>
@@ -423,7 +626,7 @@
 
         <!-- Impact Preview -->
         <div class="container mx-auto px-4 py-12">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="card-glass rounded-xl p-6">
                     <h3 class="text-xl font-semibold mb-4 flex items-center">
                         <i class="fas fa-chart-line text-green-400 mr-2"></i>
@@ -482,7 +685,7 @@
         <div class="container mx-auto px-4 py-8">
             <h2 class="text-3xl font-bold text-center mb-8">Simulation Sandbox</h2>
             
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Input Controls -->
                 <div class="card-glass rounded-xl p-6">
                     <h3 class="text-xl font-semibold mb-6 flex items-center">
@@ -495,10 +698,10 @@
                         <div>
                             <label class="block text-sm font-medium mb-2">Meteor Size (meters)</label>
                             <input type="range" id="size-slider" min="10" max="5000" value="2500" 
-                                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                   class="w-full cursor-pointer">
+                            <div class="flex justify-between text-xs mt-1" style="color: var(--text-muted);">
                                 <span>10m</span>
-                                <span id="size-value" class="text-white font-bold">2500m</span>
+                                <span id="size-value" class="font-bold" style="color: var(--text-primary);">2500m</span>
                                 <span>5000m</span>
                             </div>
                         </div>
@@ -507,10 +710,10 @@
                         <div>
                             <label class="block text-sm font-medium mb-2">Impact Speed (km/s)</label>
                             <input type="range" id="speed-slider" min="5" max="50" value="17" 
-                                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                   class="w-full cursor-pointer">
+                            <div class="flex justify-between text-xs mt-1" style="color: var(--text-muted);">
                                 <span>5 km/s</span>
-                                <span id="speed-value" class="text-white font-bold">17 km/s</span>
+                                <span id="speed-value" class="font-bold" style="color: var(--text-primary);">17 km/s</span>
                                 <span>50 km/s</span>
                             </div>
                         </div>
@@ -519,10 +722,10 @@
                         <div>
                             <label class="block text-sm font-medium mb-2">Impact Angle (degrees)</label>
                             <input type="range" id="angle-slider" min="0" max="90" value="45" 
-                                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                   class="w-full cursor-pointer">
+                            <div class="flex justify-between text-xs mt-1" style="color: var(--text-muted);">
                                 <span>0°</span>
-                                <span id="angle-value" class="text-white font-bold">45°</span>
+                                <span id="angle-value" class="font-bold" style="color: var(--text-primary);">45°</span>
                                 <span>90°</span>
                             </div>
                         </div>
@@ -530,7 +733,7 @@
                         <!-- Material Selection -->
                         <div>
                             <label class="block text-sm font-medium mb-2">Material Density</label>
-                            <select id="material-select" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2">
+                            <select id="material-select" class="w-full rounded-lg px-3 py-2" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
                                 <option value="3000">Iron (3000 kg/m³)</option>
                                 <option value="2500">Rock (2500 kg/m³)</option>
                                 <option value="1500">Ice (1500 kg/m³)</option>
@@ -541,16 +744,22 @@
                         <!-- Impact Location -->
                         <div>
                             <label class="block text-sm font-medium mb-2">Impact Location</label>
-                            <p class="text-sm text-gray-400 mb-2">Click on the map to set impact location</p>
-                            <div class="bg-gray-800 rounded-lg p-3 text-center">
+                            <p class="text-sm mb-2" style="color: var(--text-muted);">Click on the map to set impact location</p>
+                            <div class="rounded-lg p-3 text-center" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                                 <span id="impact-location" class="text-blue-400">Click map to select</span>
                             </div>
                         </div>
 
                         <!-- Run Simulation Button -->
-                        <button id="run-simulation" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-semibold transition-colors">
+                        <button id="run-simulation" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors">
                             <i class="fas fa-play mr-2"></i>Run Simulation
                         </button>
+                        
+                        <!-- Evacuation Strategy Button -->
+                        <button onclick="showSection('evacuation')" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold transition-colors mt-4">
+                            <i class="fas fa-shield-alt mr-2"></i>View Evacuation Strategy
+                        </button>
+                        <p class="text-xs text-gray-400 mt-2 text-center">Get evacuation guidance based on your simulation results</p>
                     </div>
                 </div>
 
@@ -568,7 +777,7 @@
                         <!-- Orbital Visualization -->
                         <div class="mb-6">
                             <h4 class="font-semibold mb-3 text-purple-400">3D Orbital Visualization</h4>
-                            <div id="orbital-container" class="w-full h-64 rounded-lg bg-gray-900"></div>
+                            <div id="orbital-container" class="w-full h-64 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--border-color);"></div>
                         </div>
                         
                         <!-- Output Panels -->
@@ -612,15 +821,6 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Evacuation Strategy Button -->
-            <div class="text-center mt-8">
-                <button onclick="window.location.href='evacuation.html'" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-                    <i class="fas fa-shield-alt mr-2"></i>
-                    View Evacuation Strategy
-                </button>
-                <p class="text-sm text-gray-400 mt-2">Get evacuation guidance based on your simulation results</p>
-            </div>
         </div>
     </section>
 
@@ -629,7 +829,7 @@
         <div class="container mx-auto px-4 py-8">
             <h2 class="text-3xl font-bold text-center mb-8">Impact Map Viewer</h2>
             
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Layer Controls -->
                 <div class="card-glass rounded-xl p-6">
                     <h3 class="text-xl font-semibold mb-4 flex items-center">
@@ -698,27 +898,27 @@
                     <!-- Comparison Tools -->
                     <div class="mt-6 pt-4 border-t border-gray-600">
                         <h4 class="font-semibold mb-3 text-green-400">Compare with Impactor-2025</h4>
-                        <button id="compare-simulation" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-sm transition-colors">
+                        <button id="compare-simulation" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm transition-colors">
                             <i class="fas fa-balance-scale mr-2"></i>Compare Scenarios
                         </button>
+                    </div>
+                    
+                    <!-- Evacuation Strategy Button -->
+                    <div class="mt-6 pt-4 border-t border-gray-600">
+                        <h4 class="font-semibold mb-3 text-red-400">Emergency Planning</h4>
+                        <button onclick="showSection('evacuation')" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>View Evacuation Strategy
+                        </button>
+                        <p class="text-xs text-gray-400 mt-2">Get personalized evacuation guidance</p>
                     </div>
                 </div>
 
                 <!-- Main Map -->
-                <div class="lg:col-span-3">
+                <div class="lg:col-span-2">
                     <div class="card-glass rounded-xl p-6">
                         <div id="impact-map-container" class="w-full h-[600px] rounded-lg"></div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Evacuation Strategy Button -->
-            <div class="text-center mt-8">
-                <button onclick="window.location.href='evacuation.html'" class="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors shadow-lg">
-                    <i class="fas fa-exclamation-triangle mr-3"></i>
-                    View Evacuation Strategy
-                </button>
-                <p class="text-sm text-gray-400 mt-2">Get personalized evacuation guidance based on impact scenarios</p>
             </div>
         </div>
     </section>
@@ -739,9 +939,9 @@
                     <!-- Search and Filter -->
                     <div class="space-y-3 mb-4">
                         <input type="text" id="neo-search" placeholder="Search NEOs..." 
-                               class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm">
+                               class="w-full rounded-lg px-3 py-2 text-sm" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
                         <div class="flex space-x-2">
-                            <select id="neo-risk-filter" class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-2 py-1 text-sm">
+                            <select id="neo-risk-filter" class="flex-1 rounded-lg px-2 py-1 text-sm" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
                                 <option value="all">All Risk Levels</option>
                                 <option value="high">High Risk</option>
                                 <option value="medium">Medium Risk</option>
@@ -761,17 +961,17 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Selected NEO</label>
-                                <div id="selected-neo-display" class="bg-gray-800 rounded-lg p-3 text-sm text-gray-400">
+                                <div id="selected-neo-display" class="rounded-lg p-3 text-sm neo-display" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                                     Click on an NEO above to select
                                 </div>
                             </div>
-                            <button id="run-neo-simulation" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                            <button id="run-neo-simulation" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                                 <i class="fas fa-play mr-2"></i>Run NEO Impact Simulation
                             </button>
-                            <button id="view-neo-orbit" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-sm transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                            <button id="view-neo-orbit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                                 <i class="fas fa-globe mr-2"></i>View Orbital Path
                             </button>
-                            <button id="use-neo-data" class="w-full bg-orange-600 hover:bg-orange-700 py-2 rounded-lg text-sm transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                            <button id="use-neo-data" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg text-sm transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                                 <i class="fas fa-meteor mr-2"></i>Use NEO Data in Simulation
                             </button>
                         </div>
@@ -786,12 +986,51 @@
                             NEO Analysis Dashboard
                         </h3>
                         
+                        <!-- NEO Simulation Results Component -->
+                        <div id="neo-simulation-results" class="card-glass rounded-xl p-6 mb-6">
+                            <h4 class="text-lg font-semibold mb-4 flex items-center">
+                                <i class="fas fa-chart-line text-green-400 mr-2"></i>
+                                NEO Impact Simulation Results
+                            </h4>
+                            
+                            <div id="neo-results-content" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Impact Effects -->
+                                <div class="neo-results-card neo-results-impact p-4 rounded-lg">
+                                    <h5 class="font-semibold neo-results-title mb-2">Impact Effects</h5>
+                                    <div class="space-y-1 text-sm neo-results-text">
+                                        <div>Energy: <span class="font-bold" id="neo-energy-result">--</span></div>
+                                        <div>Crater: <span class="font-bold" id="neo-crater-result">--</span></div>
+                                        <div>Fireball: <span class="font-bold" id="neo-fireball-result">--</span></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Environmental Effects -->
+                                <div class="neo-results-card neo-results-environmental p-4 rounded-lg">
+                                    <h5 class="font-semibold neo-results-title mb-2">Environmental Effects</h5>
+                                    <div class="space-y-1 text-sm neo-results-text">
+                                        <div>Tsunami: <span class="font-bold" id="neo-tsunami-result">--</span></div>
+                                        <div>Seismic: <span class="font-bold" id="neo-seismic-result">--</span></div>
+                                        <div>Affected: <span class="font-bold" id="neo-population-result">--</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="neo-results-actions" class="mt-4 flex justify-between" style="display: none;">
+                                <button id="view-neo-in-map" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    <i class="fas fa-map mr-2"></i>View in Impact Map
+                                </button>
+                                <button id="close-neo-results" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    <i class="fas fa-times mr-2"></i>Close
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Charts Container -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div class="bg-gray-800 rounded-lg p-4">
+                            <div class="rounded-lg p-4" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                                 <canvas id="size-distribution-chart"></canvas>
                             </div>
-                            <div class="bg-gray-800 rounded-lg p-4">
+                            <div class="rounded-lg p-4" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                                 <canvas id="risk-distribution-chart"></canvas>
                             </div>
                         </div>
@@ -817,6 +1056,410 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Evacuation Strategy Section -->
+    <section id="evacuation" class="section">
+        <div class="container mx-auto px-4 py-8">
+            <h2 class="text-3xl font-bold text-center mb-8">Evacuation Strategy</h2>
+            
+            <!-- Header Summary -->
+            <div class="card-glass rounded-xl p-6 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold" style="color: var(--text-primary);">
+                        Evacuation Plan: <span id="scenario-name">Asteroid Impact Simulation</span>
+                    </h3>
+                    <div class="countdown-timer" id="countdown-timer">
+                        <i class="fas fa-clock mr-2"></i>
+                        <span id="time-remaining">02:47:33</span>
+                    </div>
+                </div>
+
+                <!-- Key Facts Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="card-glass rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-red-400 mr-2"></i>
+                            <span class="font-semibold" style="color: var(--text-secondary);">Impact Location</span>
+                        </div>
+                        <p class="text-sm" style="color: var(--text-muted);" id="impact-location">Atlantic Ocean, 200km off New York</p>
+                    </div>
+
+                    <div class="card-glass rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-triangle text-orange-400 mr-2"></i>
+                            <span class="font-semibold" style="color: var(--text-secondary);">Severity Index</span>
+                        </div>
+                        <div class="severity-bar">
+                            <div class="severity-indicator" style="left: 75%;"></div>
+                        </div>
+                        <p class="text-sm" style="color: var(--text-muted);" class="mt-1">High Risk</p>
+                    </div>
+
+                    <div class="card-glass rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-broadcast-tower text-blue-400 mr-2"></i>
+                            <span class="font-semibold" style="color: var(--text-secondary);">Shockwave ETA</span>
+                        </div>
+                        <p class="text-sm" style="color: var(--text-muted);" id="shockwave-eta">~15 minutes</p>
+                    </div>
+
+                    <div class="card-glass rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-map text-green-400 mr-2"></i>
+                            <span class="font-semibold" style="color: var(--text-secondary);">Risk Zones</span>
+                        </div>
+                        <div class="mini-map" id="mini-map">
+                            <!-- Mini map will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="showSection('impact-map')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-external-link-alt mr-2"></i>View Full Impact Map
+                    </button>
+                </div>
+            </div>
+
+            <!-- Personal Risk Assessment -->
+            <div class="card-glass rounded-xl p-6 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-user-shield text-blue-400 mr-3"></i>Personal Risk Assessment
+                </h3>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Location Input -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+                                Your Location
+                            </label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="user-location" placeholder="Enter city or coordinates" 
+                                       class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                                <button id="detect-location" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-crosshairs mr-1"></i>Auto Detect
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-glass rounded-lg p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">Risk Assessment Results</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-muted);">Distance to Impact:</span>
+                                    <span class="font-semibold" style="color: var(--text-primary);" id="distance-to-impact">Calculating...</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-muted);">Shockwave Arrival:</span>
+                                    <span class="font-semibold" style="color: var(--text-primary);" id="shockwave-arrival">Calculating...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span style="color: var(--text-muted);">Risk Zone:</span>
+                                    <div class="risk-zone risk-safe" id="risk-zone">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Safe Zone</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Visualization -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold" style="color: var(--text-primary);">Risk Zone Map</h4>
+                        <div id="risk-map" class="w-full h-64 rounded-lg border" style="border-color: var(--border-color);"></div>
+                        <button id="generate-evac-plan" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-route mr-2"></i>Generate My Evac Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evacuation Guidance -->
+            <div class="card-glass rounded-xl p-6 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-list-check text-green-400 mr-3"></i>Evacuation Guidance
+                </h3>
+
+                <div class="space-y-4">
+                    <!-- Before Impact -->
+                    <div class="border rounded-lg" style="border-color: var(--border-color);">
+                        <div class="accordion-header card-glass p-4 rounded-t-lg" onclick="toggleAccordion('before-impact')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-blue-400 mr-3"></i>
+                                    <h4 class="text-lg font-semibold" style="color: var(--text-primary);">Before Impact</h4>
+                                </div>
+                                <i class="fas fa-chevron-down transition-transform" id="before-impact-chevron" style="color: var(--text-muted);"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content" id="before-impact-content">
+                            <div class="p-4 space-y-3">
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Pack emergency kit with water, food, first aid, and important documents.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Confirm evacuation route and have backup options ready.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Monitor official alerts and weather updates continuously.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Inform family and friends of your evacuation plan.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- During Impact -->
+                    <div class="border rounded-lg" style="border-color: var(--border-color);">
+                        <div class="accordion-header card-glass p-4 rounded-t-lg" onclick="toggleAccordion('during-impact')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-exclamation-triangle text-red-400 mr-3"></i>
+                                    <h4 class="text-lg font-semibold" style="color: var(--text-primary);">During Impact</h4>
+                                </div>
+                                <i class="fas fa-chevron-down transition-transform" id="during-impact-chevron" style="color: var(--text-muted);"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content" id="during-impact-content">
+                            <div class="p-4 space-y-3">
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Stay indoors and move to the center of the building.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Stay away from windows and exterior walls.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Protect your ears and eyes from the blast wave.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Take cover under sturdy furniture if possible.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- After Impact -->
+                    <div class="border rounded-lg" style="border-color: var(--border-color);">
+                        <div class="accordion-header card-glass p-4 rounded-t-lg" onclick="toggleAccordion('after-impact')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-shield-alt text-green-400 mr-3"></i>
+                                    <h4 class="text-lg font-semibold" style="color: var(--text-primary);">After Impact</h4>
+                                </div>
+                                <i class="fas fa-chevron-down transition-transform" id="after-impact-chevron" style="color: var(--text-muted);"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content" id="after-impact-content">
+                            <div class="p-4 space-y-3">
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Avoid coastal areas due to potential tsunami waves.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Check radio updates for official safety information.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Seek medical aid if injured and help others if safe.</p>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                    <p style="color: var(--text-secondary);">Stay away from damaged buildings and debris.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container mx-auto px-4 py-8">
+            <h2 class="text-3xl font-bold text-center mb-8">About Impact1000</h2>
+            
+            <!-- Purpose Section -->
+            <div class="card-glass rounded-xl p-8 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-bullseye text-blue-400 mr-3"></i>
+                    Purpose
+                </h3>
+                <p class="text-lg leading-relaxed" style="color: var(--text-secondary);">
+                    Impact1000 is a public demonstration project created for the Meteor Madness Hackathon. 
+                    It visualizes the potential effects of a meteor impact and explores how data-driven simulations 
+                    can inform better evacuation strategies and planetary defense awareness.
+                </p>
+            </div>
+
+            <!-- Development Team Section -->
+            <div class="card-glass rounded-xl p-8 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-users text-green-400 mr-3"></i>
+                    Development Team — Up1000%
+                </h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <!-- Team Member 1 -->
+                    <a href="https://www.linkedin.com/in/viet-hoang-vu-894b7a23b/" target="_blank" class="card-glass rounded-xl p-6 text-center hover:scale-105 transition-transform duration-200">
+                        <img src="https://media.licdn.com/dms/image/C4D03AQEexample1/profile-displayphoto-shrink_200_200/0/1234567890?e=1234567890&v=beta&t=example1" alt="Viet Hoang Vu" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-blue-400">
+                        <h4 class="text-lg font-bold mb-2" style="color: var(--text-primary);">Viet Hoang Vu (Hazel)</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Full Stack Developer</p>
+                        <div class="mt-2">
+                            <i class="fab fa-linkedin text-blue-600 text-sm"></i>
+                        </div>
+                    </a>
+
+                    <!-- Team Member 2 -->
+                    <a href="https://www.linkedin.com/in/bruce-bach-nguyen-491159178/" target="_blank" class="card-glass rounded-xl p-6 text-center hover:scale-105 transition-transform duration-200">
+                        <img src="https://media.licdn.com/dms/image/C4D03AQEexample2/profile-displayphoto-shrink_200_200/0/1234567890?e=1234567890&v=beta&t=example2" alt="Bruce Bach Nguyen" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-green-400">
+                        <h4 class="text-lg font-bold mb-2" style="color: var(--text-primary);">Dac Le Bach Nguyen (Bruce)</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Data Scientist</p>
+                        <div class="mt-2">
+                            <i class="fab fa-linkedin text-blue-600 text-sm"></i>
+                        </div>
+                    </a>
+
+                    <!-- Team Member 3 -->
+                    <a href="https://www.linkedin.com/in/kien-anh-le/" target="_blank" class="card-glass rounded-xl p-6 text-center hover:scale-105 transition-transform duration-200">
+                        <img src="https://media.licdn.com/dms/image/C4D03AQEexample3/profile-displayphoto-shrink_200_200/0/1234567890?e=1234567890&v=beta&t=example3" alt="Kien Anh Le" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-yellow-400">
+                        <h4 class="text-lg font-bold mb-2" style="color: var(--text-primary);">Kien Anh Le (Ant)</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Frontend Developer</p>
+                        <div class="mt-2">
+                            <i class="fab fa-linkedin text-blue-600 text-sm"></i>
+                        </div>
+                    </a>
+
+                    <!-- Team Member 4 -->
+                    <a href="https://www.linkedin.com/in/trongnghianguyen/" target="_blank" class="card-glass rounded-xl p-6 text-center hover:scale-105 transition-transform duration-200">
+                        <img src="https://media.licdn.com/dms/image/C4D03AQEexample4/profile-displayphoto-shrink_200_200/0/1234567890?e=1234567890&v=beta&t=example4" alt="Trong Nghia Nguyen" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-red-400">
+                        <h4 class="text-lg font-bold mb-2" style="color: var(--text-primary);">Trong Nghia Nguyen (Nick)</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">UI/UX Designer</p>
+                        <div class="mt-2">
+                            <i class="fab fa-linkedin text-blue-600 text-sm"></i>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="text-center mt-6">
+                    <p class="text-sm" style="color: var(--text-muted);">Click on any team member to visit their LinkedIn profile</p>
+                </div>
+            </div>
+
+            <!-- Data & Tools Section -->
+            <div class="card-glass rounded-xl p-8 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-database text-purple-400 mr-3"></i>
+                    Data & Tools
+                </h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-satellite text-2xl text-blue-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">NASA CNEOS</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Near-Earth Object Data</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-chart-line text-2xl text-green-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Chart.js</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Data Visualization</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-cube text-2xl text-purple-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Three.js</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">3D Visualization</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-map text-2xl text-red-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Leaflet.js</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Interactive Maps</p>
+                    </div>
+                </div>
+                
+                <!-- Additional Technologies Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-code text-2xl text-yellow-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Python Flask</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Backend API</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-database text-2xl text-indigo-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Supabase</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Database</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-file-code text-2xl text-pink-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Tailwind CSS</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Styling Framework</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-book text-2xl text-teal-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1" style="color: var(--text-primary);">Jupyter</h4>
+                        <p class="text-sm" style="color: var(--text-muted);">Data Analysis</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acknowledgements Section -->
+            <div class="card-glass rounded-xl p-8 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-heart text-red-400 mr-3"></i>
+                    Acknowledgements
+                </h3>
+                <p class="text-lg leading-relaxed" style="color: var(--text-secondary);">
+                    We thank NASA and open scientific databases and visualization frameworks that enable 
+                    accessible learning about Earth-impact risks.
+                </p>
+            </div>
+
+            <!-- Disclaimer Section -->
+            <div class="card-glass rounded-xl p-8 mb-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-3"></i>
+                    Disclaimer
+                </h3>
+                <p class="text-lg leading-relaxed" style="color: var(--text-secondary);">
+                    Impact1000 is a fictional educational tool. All simulations, including "Impactor-2025," 
+                    are hypothetical and not predictive.
+                </p>
             </div>
         </div>
     </section>

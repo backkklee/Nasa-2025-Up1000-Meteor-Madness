@@ -11,6 +11,10 @@ class Impact1000App {
         this.orbitalVisualizer = null;
         this.selectedNEO = null;
         
+        // Chart references
+        this.sizeChart = null;
+        this.riskChart = null;
+        
         // Layer tracking
         this.impactorLayersAdded = false;
         this.topologyLayer = null;
@@ -30,6 +34,9 @@ class Impact1000App {
         this.initializeTheme();
         this.startCountdown();
         await this.setupMaps();
+        
+        // Initialize NEO results component with blank data
+        this.clearNEOResults();
         await this.loadNEOData();
         this.updateCharts();
         this.showSection('homepage'); // Initialize with homepage active
@@ -65,6 +72,15 @@ class Impact1000App {
             this.useNEODataInSimulation();
         });
 
+        // Evacuation page event listeners
+        document.getElementById('detect-location').addEventListener('click', () => {
+            this.detectUserLocation();
+        });
+
+        document.getElementById('generate-evac-plan').addEventListener('click', () => {
+            this.generateEvacuationPlan();
+        });
+
         // Layer toggles are handled by individual event listeners below
 
         // Compare simulation
@@ -88,6 +104,15 @@ class Impact1000App {
 
         document.getElementById('view-neo-orbit').addEventListener('click', () => {
             this.viewNEOOrbit();
+        });
+
+        // NEO Results component buttons
+        document.getElementById('view-neo-in-map').addEventListener('click', () => {
+            this.viewNEOInImpactMap();
+        });
+
+        document.getElementById('close-neo-results').addEventListener('click', () => {
+            this.clearNEOResults();
         });
 
         // Impact Map layer controls
@@ -169,6 +194,9 @@ class Impact1000App {
         
         // Update map themes if they exist
         this.updateMapThemes();
+        
+        // Update charts with new theme colors
+        this.updateCharts();
     }
 
     toggleTheme() {
@@ -214,14 +242,12 @@ class Impact1000App {
 
             // Update navigation buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-blue-600');
-                btn.classList.add('bg-gray-600');
+                btn.classList.remove('active');
             });
 
             const activeBtn = document.querySelector(`[data-section="${sectionName}"]`);
             if (activeBtn) {
-                activeBtn.classList.remove('bg-gray-600');
-                activeBtn.classList.add('active', 'bg-blue-600');
+                activeBtn.classList.add('active');
             }
 
             // Initialize section-specific features
@@ -230,6 +256,8 @@ class Impact1000App {
                 this.initializeOrbitalVisualizer();
             } else if (sectionName === 'impact-map') {
                 this.initializeImpactMap();
+            } else if (sectionName === 'evacuation') {
+                this.initializeEvacuationMaps();
             }
         }
     }
@@ -270,12 +298,16 @@ class Impact1000App {
             center: [0, 0],
             zoom: 2,
             zoomControl: true,
-            attributionControl: false
+            attributionControl: false,
+            worldCopyJump: false, // Prevent infinite repetition
+            maxBounds: [[-85, -180], [85, 180]], // Limit to Earth bounds
+            maxBoundsViscosity: 1.0 // Keep map within bounds
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
-            maxZoom: 18
+            maxZoom: 18,
+            noWrap: true // Prevent tile wrapping
         }).addTo(this.simulationMap);
 
         // Add click handler for impact location
@@ -322,6 +354,128 @@ class Impact1000App {
 
         // Add default Impactor-2025 zone
         this.addImpactor2025Zone();
+    }
+
+    initializeEvacuationMaps() {
+        // Initialize mini map
+        this.initializeMiniMap();
+        
+        // Initialize risk assessment map
+        this.initializeRiskMap();
+        
+        // Initialize countdown timer
+        this.initializeEvacuationCountdown();
+    }
+
+    initializeMiniMap() {
+        if (this.miniMap) return;
+
+        this.miniMap = L.map('mini-map', {
+            center: [40.7128, -74.0060],
+            zoom: 6,
+            zoomControl: false,
+            attributionControl: false,
+            dragging: false,
+            touchZoom: false,
+            doubleClickZoom: false,
+            scrollWheelZoom: false,
+            boxZoom: false,
+            keyboard: false,
+            worldCopyJump: false,
+            maxBounds: [[-85, -180], [85, 180]],
+            maxBoundsViscosity: 1.0
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            noWrap: true
+        }).addTo(this.miniMap);
+
+        // Add impact point
+        L.marker([40.7128, -74.0060], {
+            icon: L.divIcon({
+                className: 'impact-marker',
+                html: '<i class="fas fa-bomb text-red-500 text-xl"></i>',
+                iconSize: [20, 20]
+            })
+        }).addTo(this.miniMap);
+
+        // Add risk rings
+        L.circle([40.7128, -74.0060], {
+            radius: 50000,
+            className: 'impact-ring ring-fireball',
+            fill: false,
+            weight: 2,
+            color: '#ff6b6b'
+        }).addTo(this.miniMap);
+
+        L.circle([40.7128, -74.0060], {
+            radius: 200000,
+            className: 'impact-ring ring-crater',
+            fill: false,
+            weight: 2,
+            color: '#ffa726'
+        }).addTo(this.miniMap);
+
+        L.circle([40.7128, -74.0060], {
+            radius: 500000,
+            className: 'impact-ring ring-damage',
+            fill: false,
+            weight: 2,
+            color: '#ffeb3b'
+        }).addTo(this.miniMap);
+    }
+
+    initializeRiskMap() {
+        if (this.riskMap) return;
+
+        this.riskMap = L.map('risk-map', {
+            center: [40.7128, -74.0060],
+            zoom: 4,
+            zoomControl: true,
+            worldCopyJump: false,
+            maxBounds: [[-85, -180], [85, 180]],
+            maxBoundsViscosity: 1.0
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            noWrap: true
+        }).addTo(this.riskMap);
+
+        // Add impact point
+        L.marker([40.7128, -74.0060], {
+            icon: L.divIcon({
+                className: 'impact-marker',
+                html: '<i class="fas fa-bomb text-red-500 text-2xl"></i>',
+                iconSize: [30, 30]
+            })
+        }).addTo(this.riskMap);
+
+        // Add risk zones
+        L.circle([40.7128, -74.0060], {
+            radius: 50000,
+            color: '#ff6b6b',
+            fillColor: '#ff6b6b',
+            fillOpacity: 0.3,
+            weight: 2
+        }).addTo(this.riskMap).bindPopup('Fireball Zone - Immediate destruction');
+
+        L.circle([40.7128, -74.0060], {
+            radius: 200000,
+            color: '#ffa726',
+            fillColor: '#ffa726',
+            fillOpacity: 0.2,
+            weight: 2
+        }).addTo(this.riskMap).bindPopup('Crater Zone - Severe damage');
+
+        L.circle([40.7128, -74.0060], {
+            radius: 500000,
+            color: '#ffeb3b',
+            fillColor: '#ffeb3b',
+            fillOpacity: 0.1,
+            weight: 2
+        }).addTo(this.riskMap).bindPopup('Damage Zone - Moderate effects');
     }
 
     setImpactLocation(latlng) {
@@ -757,7 +911,7 @@ class Impact1000App {
         
         // Update display
         document.getElementById('selected-neo-display').innerHTML = `
-            <div class="font-semibold text-white">${neo.name}</div>
+            <div class="font-semibold neo-name">${neo.name}</div>
             <div>Diameter: ${(neo.diameter / 1000).toFixed(2)} km</div>
             <div>Velocity: ${neo.velocity.toFixed(1)} km/s</div>
             <div>Risk Level: <span class="text-${neo.riskLevel.level === 'high' ? 'red' : neo.riskLevel.level === 'medium' ? 'yellow' : 'green'}-400">${neo.riskLevel.level.toUpperCase()}</span></div>
@@ -908,59 +1062,23 @@ class Impact1000App {
     }
 
     showNEOSimulationResults(neo, results) {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        modal.innerHTML = `
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">NEO Impact Simulation Results</h3>
-                    <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-                
-                <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">${neo.name}</h4>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>Diameter: ${(neo.diameter / 1000).toFixed(2)} km</div>
-                        <div>Velocity: ${neo.velocity.toFixed(1)} km/s</div>
-                        <div>Miss Distance: ${(neo.lastMissDistance / 1000000).toFixed(2)}M km</div>
-                        <div>Risk Level: <span class="text-${neo.riskLevel.level === 'high' ? 'red' : neo.riskLevel.level === 'medium' ? 'yellow' : 'green'}-400">${neo.riskLevel.level.toUpperCase()}</span></div>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-                        <h5 class="font-semibold text-red-800 dark:text-red-200 mb-2">Impact Effects</h5>
-                        <div class="space-y-1 text-sm">
-                            <div>Energy: <span class="font-bold">${results.energy_mt || results.energy} MT</span></div>
-                            <div>Crater: <span class="font-bold">${results.crater_diameter_km || results.craterDiameter} km</span></div>
-                            <div>Fireball: <span class="font-bold">${results.fireball_radius_km || results.fireballRadius} km</span></div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                        <h5 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">Environmental Effects</h5>
-                        <div class="space-y-1 text-sm">
-                            <div>Tsunami: <span class="font-bold">${results.tsunami_height_m || results.tsunamiHeight} m</span></div>
-                            <div>Seismic: <span class="font-bold">${results.seismic_magnitude || results.seismicMagnitude}</span></div>
-                            <div>Affected: <span class="font-bold">${(results.affected_population || results.affectedPopulation).toLocaleString()}</span></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4 flex justify-between">
-                    <button onclick="window.impact1000App.viewInImpactMap('${neo.id}', '${neo.name}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-map mr-2"></i>View in Impact Map
-                    </button>
-                    <button onclick="this.closest('.fixed').remove()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        Close
-                    </button>
-                </div>
-            </div>
-        `;
+        // Update the NEO results component
+        document.getElementById('neo-energy-result').textContent = results.energy_mt || results.energy || '--';
+        document.getElementById('neo-crater-result').textContent = results.crater_diameter_km || results.craterDiameter || '--';
+        document.getElementById('neo-fireball-result').textContent = results.fireball_radius_km || results.fireballRadius || '--';
+        document.getElementById('neo-tsunami-result').textContent = results.tsunami_height_m || results.tsunamiHeight || '--';
+        document.getElementById('neo-seismic-result').textContent = results.seismic_magnitude || results.seismicMagnitude || '--';
+        document.getElementById('neo-population-result').textContent = (results.affected_population || results.affectedPopulation || 0).toLocaleString();
         
-        document.body.appendChild(modal);
+        // Show action buttons
+        document.getElementById('neo-results-actions').style.display = 'flex';
+        
+        // Store current NEO data for map viewing
+        this.currentNEOForMap = {
+            id: neo.id,
+            name: neo.name,
+            simulationResults: results
+        };
     }
 
     async viewNEOOrbit() {
@@ -983,6 +1101,44 @@ class Impact1000App {
             console.error('Error viewing NEO orbit:', error);
             alert('Error loading orbital visualization. Please try again.');
         }
+    }
+
+    viewNEOInImpactMap() {
+        if (!this.currentNEOForMap) {
+            alert('No simulation results available.');
+            return;
+        }
+
+        // Switch to impact map section
+        this.showSection('impact-map');
+        
+        // Set the impact location and results
+        this.impactLocation = {
+            lat: 40.7128, // Default to NYC for demo
+            lng: -74.0060,
+            name: this.currentNEOForMap.name
+        };
+        
+        this.simulationResults = this.currentNEOForMap.simulationResults;
+        
+        // Update impact map with results
+        this.updateImpactMap();
+    }
+
+    clearNEOResults() {
+        // Reset all result fields to blank
+        document.getElementById('neo-energy-result').textContent = '--';
+        document.getElementById('neo-crater-result').textContent = '--';
+        document.getElementById('neo-fireball-result').textContent = '--';
+        document.getElementById('neo-tsunami-result').textContent = '--';
+        document.getElementById('neo-seismic-result').textContent = '--';
+        document.getElementById('neo-population-result').textContent = '--';
+        
+        // Hide action buttons
+        document.getElementById('neo-results-actions').style.display = 'none';
+        
+        // Clear stored NEO data
+        this.currentNEOForMap = null;
     }
 
     viewInImpactMap(asteroidId, asteroidName) {
@@ -1645,6 +1801,10 @@ class Impact1000App {
     }
 
     updateCharts() {
+        // Get theme-appropriate text color
+        const isDarkTheme = document.body.getAttribute('data-theme') === 'dark';
+        const textColor = isDarkTheme ? 'white' : '#2d1b0e'; // Dark brown for light theme
+        
         // Size distribution chart
         const sizeCtx = document.getElementById('size-distribution-chart');
         if (sizeCtx) {
@@ -1654,7 +1814,12 @@ class Impact1000App {
                 large: this.neos.filter(n => n.diameter >= 5000).length
             };
 
-            new Chart(sizeCtx, {
+            // Destroy existing chart if it exists
+            if (this.sizeChart) {
+                this.sizeChart.destroy();
+            }
+
+            this.sizeChart = new Chart(sizeCtx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Small (<1km)', 'Medium (1-5km)', 'Large (>5km)'],
@@ -1667,7 +1832,12 @@ class Impact1000App {
                     responsive: true,
                     plugins: {
                         legend: {
-                            labels: { color: 'white' }
+                            labels: { 
+                                color: textColor,
+                                font: {
+                                    size: 12
+                                }
+                            }
                         }
                     }
                 }
@@ -1683,7 +1853,12 @@ class Impact1000App {
                 high: this.neos.filter(n => n.riskLevel.level === 'high').length
             };
 
-            new Chart(riskCtx, {
+            // Destroy existing chart if it exists
+            if (this.riskChart) {
+                this.riskChart.destroy();
+            }
+
+            this.riskChart = new Chart(riskCtx, {
                 type: 'bar',
                 data: {
                     labels: ['Low Risk', 'Medium Risk', 'High Risk'],
@@ -1698,12 +1873,117 @@ class Impact1000App {
                         legend: { display: false }
                     },
                     scales: {
-                        y: { ticks: { color: 'white' } },
-                        x: { ticks: { color: 'white' } }
+                        y: { 
+                            ticks: { 
+                                color: textColor,
+                                font: {
+                                    size: 11
+                                }
+                            } 
+                        },
+                        x: { 
+                            ticks: { 
+                                color: textColor,
+                                font: {
+                                    size: 11
+                                }
+                            } 
+                        }
                     }
                 }
             });
         }
+    }
+
+    // Evacuation page methods
+    detectUserLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                document.getElementById('user-location').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                this.calculateRiskAssessment(lat, lng);
+            }, (error) => {
+                alert('Unable to detect location. Please enter manually.');
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    }
+
+    calculateRiskAssessment(lat, lng) {
+        const impactLat = 40.7128;
+        const impactLng = -74.0060;
+        
+        // Calculate distance using Haversine formula
+        const distance = this.calculateDistance(lat, lng, impactLat, impactLng);
+        
+        document.getElementById('distance-to-impact').textContent = `${distance.toFixed(0)} km`;
+        
+        // Calculate shockwave arrival time (simplified)
+        const shockwaveTime = Math.max(1, Math.floor(distance / 1000)); // Rough estimate
+        document.getElementById('shockwave-arrival').textContent = `${shockwaveTime} minutes`;
+        
+        // Determine risk zone
+        const riskZoneElement = document.getElementById('risk-zone');
+        if (distance < 50) {
+            riskZoneElement.className = 'risk-zone risk-danger';
+            riskZoneElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Danger Zone</span>';
+        } else if (distance < 200) {
+            riskZoneElement.className = 'risk-zone risk-caution';
+            riskZoneElement.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Caution Zone</span>';
+        } else {
+            riskZoneElement.className = 'risk-zone risk-safe';
+            riskZoneElement.innerHTML = '<i class="fas fa-check-circle"></i><span>Safe Zone</span>';
+        }
+        
+        // Enable evac plan button
+        document.getElementById('generate-evac-plan').disabled = false;
+    }
+
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    generateEvacuationPlan() {
+        alert('Evacuation plan generated! Check the guidance sections above for detailed instructions.');
+    }
+
+    // Initialize evacuation countdown timer
+    initializeEvacuationCountdown() {
+        const updateCountdown = () => {
+            const countdownElement = document.getElementById('time-remaining');
+            if (!countdownElement) return;
+            
+            let time = countdownElement.textContent;
+            let [hours, minutes, seconds] = time.split(':').map(Number);
+            
+            seconds--;
+            if (seconds < 0) {
+                seconds = 59;
+                minutes--;
+                if (minutes < 0) {
+                    minutes = 59;
+                    hours--;
+                    if (hours < 0) {
+                        hours = 0;
+                        minutes = 0;
+                        seconds = 0;
+                    }
+                }
+            }
+            
+            countdownElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        };
+        
+        setInterval(updateCountdown, 1000);
     }
 }
 
@@ -1717,6 +1997,19 @@ function showSection(sectionName) {
 function toggleTheme() {
     if (window.impact1000App) {
         window.impact1000App.toggleTheme();
+    }
+}
+
+function toggleAccordion(id) {
+    const content = document.getElementById(id + '-content');
+    const chevron = document.getElementById(id + '-chevron');
+    
+    if (content.classList.contains('active')) {
+        content.classList.remove('active');
+        chevron.style.transform = 'rotate(0deg)';
+    } else {
+        content.classList.add('active');
+        chevron.style.transform = 'rotate(180deg)';
     }
 }
 
